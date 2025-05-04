@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { domElement } from './three';
+import { renderer } from './three';
+
+const { domElement } = renderer;
 
 export const App = () => {
   const ref = useRef<HTMLDivElement>(null);
