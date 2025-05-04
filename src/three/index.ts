@@ -1,6 +1,23 @@
-import * as THREE from 'three';
+import { scene } from './scene';
+import { cube } from './cube';
+import { light } from './light';
+import { camera } from './camera';
+import { renderer } from './renderer';
 
-// 渲染器
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-export const { domElement } = renderer;
+scene.add(cube);
+scene.add(light);
+
+function render(time: number) {
+  time *= 0.001;
+
+  cube.rotation.x = time;
+  cube.rotation.y = time;
+
+  renderer.render(scene, camera);
+
+  requestAnimationFrame(render);
+}
+
+requestAnimationFrame(render);
+
+export { renderer };
