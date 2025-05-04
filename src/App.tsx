@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
-import { domElement } from "./three";
+import { useEffect, useRef } from 'react';
+import { domElement } from './three';
 
-const App = () => {
+export const App = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -14,5 +14,3 @@ const App = () => {
 
   return <div ref={ref} />;
 };
-
-export default App;
