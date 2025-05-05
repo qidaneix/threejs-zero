@@ -2,6 +2,7 @@ import { scene } from './scene';
 import { cubes } from './makeInstance';
 import { light } from './light';
 import { camera } from './camera';
+import { controls } from './controls';
 import { renderer } from './renderer';
 
 scene.add(...cubes);
@@ -17,6 +18,7 @@ function render(time: number) {
     cube.rotation.y = rot;
   });
 
+  controls.update();
   renderer.render(scene, camera);
 
   requestAnimationFrame(render);
@@ -25,3 +27,12 @@ function render(time: number) {
 requestAnimationFrame(render);
 
 export { renderer };
+
+document.body.addEventListener('resize', function () {
+  // 更新渲染器尺寸
+  renderer.setSize(document.body.clientWidth, document.body.clientHeight);
+  // 更新相机的宽高比
+  camera.aspect = document.body.clientWidth / document.body.clientHeight;
+  // 更新相机的投影矩阵
+  camera.updateProjectionMatrix();
+});
