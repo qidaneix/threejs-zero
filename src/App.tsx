@@ -1,18 +1,23 @@
 import { useEffect, useRef } from 'react';
-import { renderer } from './three';
-
-const { domElement } = renderer;
+import { init } from './webgpu';
 
 export const App = () => {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const divEle = ref.current;
-    if (!divEle) return;
+    const canvasEle = ref.current;
+    if (!canvasEle) return;
 
-    divEle.replaceChildren();
-    divEle.appendChild(domElement);
+    init(canvasEle);
   }, []);
 
-  return <div ref={ref} />;
+  return (
+    <div style={{ width: '100%', height: '100%' }}>
+      <canvas
+        width={document.body.clientWidth}
+        height={document.body.clientHeight}
+        ref={ref}
+      />
+    </div>
+  );
 };
