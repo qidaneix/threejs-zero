@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 const color = 0xffffff;
 const intensity = 1;

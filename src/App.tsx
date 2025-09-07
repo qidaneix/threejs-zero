@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { renderer } from "./three";
+import { useEffect, useRef } from 'react';
+import { renderer } from './three';
 
 const { domElement } = renderer;
 

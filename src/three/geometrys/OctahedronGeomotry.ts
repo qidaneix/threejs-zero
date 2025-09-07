@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 export class OctahedronGeometry extends THREE.BufferGeometry {
   constructor(
@@ -7,7 +7,7 @@ export class OctahedronGeometry extends THREE.BufferGeometry {
     h1: number,
     h2: number,
     d1: number,
-    d2: number
+    d2: number,
   ) {
     super();
     // 6个顶点
@@ -32,7 +32,7 @@ export class OctahedronGeometry extends THREE.BufferGeometry {
       4, 2, 1,
       4, 1, 3,
     ];
-    this.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+    this.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     this.setIndex(indices);
   }
 }
