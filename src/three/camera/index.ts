@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 // 透视相机
 const fov = 75; // 视野范围，单位是度数

@@ -1,4 +1,4 @@
-import { CubeGeometry } from "../../../geometrys/CubeGeometry";
+import { CubeGeometry } from '../../../geometrys/CubeGeometry';
 
 const boxWidth = 1;
 const boxHeight = 1;

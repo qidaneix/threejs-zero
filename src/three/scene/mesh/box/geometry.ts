@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 const boxWidth = 1;
 const boxHeight = 1;

@@ -1,6 +1,6 @@
-import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { camera } from "../camera";
-import { renderer } from "../renderer";
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { camera } from '../camera';
+import { renderer } from '../renderer';
 
 const { domElement } = renderer;
 

@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
 // 材质
 export const material = new THREE.MeshBasicMaterial({
