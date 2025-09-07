@@ -2,6 +2,5 @@ import * as THREE from 'three';
 
 // 材质
 export const material = new THREE.MeshBasicMaterial({
-  color: 0x11ff88,
-  wireframe: true,
+  color: 0x0000ff,
 });
