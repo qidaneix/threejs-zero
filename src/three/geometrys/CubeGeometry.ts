@@ -1,9 +1,9 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
-export class BoxxGeometry extends THREE.BufferGeometry {
+export class CubeGeometry extends THREE.BufferGeometry {
   constructor(width: number, height: number, depth: number) {
     super();
-    // 8个点
+    // 8个顶点
     /* prettier-ignore */
     const vertices = new Float32Array([
         width/2, height/2, depth/2,
@@ -15,8 +15,8 @@ export class BoxxGeometry extends THREE.BufferGeometry {
         -width/2, height/2, -depth/2,
         -width/2, -height/2, -depth/2
     ]);
-    /* prettier-ignore */
     // 顶点索引
+    /* prettier-ignore */
     const indices = [
         0, 1, 2,
         1, 4, 2,
@@ -31,7 +31,7 @@ export class BoxxGeometry extends THREE.BufferGeometry {
         0, 3, 6,
         0, 6, 1
     ]
-    this.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+    this.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     this.setIndex(indices);
   }
 }
