@@ -2,11 +2,11 @@ import { renderer } from "./renderer";
 import { camera } from "./camera";
 import { controls } from "./controls";
 import { scene } from "./scene";
-import { cube } from "./scene/mesh/cube";
+import { box } from "./scene/mesh/box";
 
 function animate(time: number) {
-  cube.rotation.x += 10e-3;
-  cube.rotation.y += 10e-3;
+  // box.rotation.x += 10e-3;
+  // box.rotation.y += 10e-3;
 
   controls.update();
   renderer.render(scene, camera);
