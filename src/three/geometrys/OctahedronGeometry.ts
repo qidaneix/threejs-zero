@@ -30,7 +30,7 @@ export class OctahedronGeometry extends THREE.BufferGeometry {
       1, 2, 5,
       1, 5, 3,
       4, 2, 1,
-      4, 1, 3,
+      4, 1, 3
     ];
     this.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     this.setIndex(indices);
