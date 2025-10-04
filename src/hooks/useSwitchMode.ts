@@ -8,6 +8,13 @@ export const useSwitchMode = (
 
   // 键盘快捷键
   const keydownHandler = useCallback(function (event: KeyboardEvent) {
+    switch (event.code.toLowerCase()) {
+      case 'escape': {
+        setMode(EMode.select);
+        return;
+      }
+    }
+
     if (!event.ctrlKey) return;
 
     switch (event.key.toLowerCase()) {

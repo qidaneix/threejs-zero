@@ -5,7 +5,7 @@ import { EMode } from '../interface';
 
 export const useRayCaster = (
   divRef: React.RefObject<HTMLDivElement | null>,
-  mode: EMode,
+  [mode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
   const rayCasterRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   const pieceRef = useRef<HTMLDivElement>(null);
