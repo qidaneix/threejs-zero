@@ -8,6 +8,8 @@ export { renderer };
 
 // 键盘快捷键
 document.body.addEventListener('keydown', function (event) {
+  if (event.ctrlKey) return;
+
   switch (event.key.toLowerCase()) {
     case 't': {
       transformControls.setMode('translate');
@@ -35,10 +37,7 @@ document.body.addEventListener('resize', function () {
 });
 
 // --- 渲染循环 ---
-function animate(time: number) {
-  // box.rotation.x += 10e-3;
-  // box.rotation.y += 10e-3;
-
+function animate() {
   if (orbitControls.enabled) orbitControls.update();
 
   renderer.render(scene, camera);

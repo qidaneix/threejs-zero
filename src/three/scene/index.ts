@@ -1,17 +1,12 @@
 import * as THREE from 'three';
-// import { box } from './mesh/box';
-// import { cube } from './mesh/cube';
-import { octahedron } from './mesh/octahedron';
-// import { tetrahedron } from './mesh/tetrahedron';
 import { light } from './light';
 import { axesHelper } from './helper/axes';
 import { gridHelper } from './helper/grid';
-import { transformControls } from '../controls/transform';
+// import { transformControls } from '../controls/transform';
 
 // 场景
 export const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xdddddd);
 
-transformControls.attach(octahedron);
-scene.add(octahedron, axesHelper, gridHelper, light);
-scene.add(transformControls.getHelper());
+scene.add(axesHelper, gridHelper, light);
+// scene.add(transformControls.getHelper());
