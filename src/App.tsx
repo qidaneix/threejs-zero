@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { Tag } from 'antd';
 import { renderer } from './three';
-import { EMode } from './interface';
+import { useResize } from './hooks/useResize';
+import { useSwitchMode } from './hooks/useSwitchMode';
+import { useRayCaster } from './hooks/useRayCaster';
+import { useDrawPolyline } from './hooks/useDrawPolyline';
 
 const { domElement } = renderer;
 
 const App = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const modeRef = useRef<EMode>(EMode.select);
 
   useEffect(() => {
     const divEle = ref.current;
@@ -16,33 +19,19 @@ const App = () => {
     divEle.appendChild(domElement);
   }, []);
 
-  // 键盘快捷键
-  const keydownHandler = useCallback(function (event: KeyboardEvent) {
-    switch (event.key.toLowerCase()) {
-      case 'q': {
-        modeRef.current = EMode.select;
-        break;
-      }
-      case 'd': {
-        modeRef.current = EMode.drawPolyline;
-        break;
-      }
-      case 'b': {
-        modeRef.current = EMode.drawBox;
-        break;
-      }
-    }
-  }, []);
+  useResize(ref);
+  const [mode] = useSwitchMode(ref);
+  const rayCasterRef = useRayCaster(ref, mode);
+  useDrawPolyline(ref, rayCasterRef, mode);
 
-  useEffect(() => {
-    domElement.addEventListener('keydown', keydownHandler);
-
-    return () => {
-      domElement.removeEventListener('keydown', keydownHandler);
-    };
-  }, [keydownHandler]);
-
-  return <div className="app" ref={ref} tabIndex={0} />;
+  return (
+    <>
+      <div className="app" ref={ref} tabIndex={0} />
+      <Tag color="blue" className="tag">
+        {mode}
+      </Tag>
+    </>
+  );
 };
 
 export default App;
