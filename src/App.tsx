@@ -28,8 +28,8 @@ const App = () => {
   useResize(ref);
   const rayCasterRef = useRayCaster(ref);
   const [mode, setMode] = useSwitchMode(ref);
-  useSelect(ref, rayCasterRef, annos, [mode, setMode]);
-  useDrawPolyline(ref, rayCasterRef, [mode, setMode]);
+  useSelect(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
+  useDrawPolyline(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
 
   return (
     <>

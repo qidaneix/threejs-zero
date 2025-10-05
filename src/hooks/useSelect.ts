@@ -9,16 +9,22 @@ import { camera } from '../three/camera';
 export const useSelect = (
   divRef: React.RefObject<HTMLDivElement | null>,
   rayCasterRef: React.RefObject<THREE.Raycaster>,
-  annos: Polyline[],
-  [mode, setMode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
+  [annos]: [Polyline[], React.Dispatch<React.SetStateAction<Polyline[]>>],
+  [mode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
   const hoveredAnnoRef = useRef<Polyline | null>(null);
   const focusedAnnoRef = useRef<Polyline | null>(null);
 
   const cleanHoveredAnnoRef = useCallback(() => {
     const preAnno = hoveredAnnoRef.current;
-    preAnno?.offHover();
     hoveredAnnoRef.current = null;
+    if (preAnno !== focusedAnnoRef.current) preAnno?.offHover();
+  }, []);
+
+  const cleanFocusedAnnoRef = useCallback(() => {
+    const preAnno = focusedAnnoRef.current;
+    preAnno?.offFocus();
+    focusedAnnoRef.current = null;
   }, []);
 
   // 鼠标hover
@@ -42,7 +48,7 @@ export const useSelect = (
       const anno = annos.find(
         (i) => i.getObject3D().uuid === hoveredObject3D.uuid,
       );
-      if (!anno) return;
+      if (!anno || anno === focusedAnnoRef.current) return;
 
       anno.onHover();
       hoveredAnnoRef.current = anno;
@@ -51,48 +57,31 @@ export const useSelect = (
   );
 
   // 鼠标点击
-  // const clickHandler = useCallback(
-  //   function () {
-  //     const rayCaster = rayCasterRef.current;
-  //     const polylineDrawer = polylineDrawerRef.current;
+  const clickHandler = useCallback(
+    function () {
+      cleanFocusedAnnoRef();
 
-  //     const ray = rayCaster.ray;
-  //     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  //     const intersection = findLinePlaneIntersection(ray, plane);
+      const anno = hoveredAnnoRef.current;
+      if (!anno) return;
 
-  //     console.log('intersection', intersection);
-  //     if (intersection) polylineDrawer?.addPoint(intersection);
-  //   },
-  //   [rayCasterRef],
-  // );
-
-  // // 完成绘制
-  // const keydownHandler = useCallback(
-  //   function (event: KeyboardEvent) {
-  //     if (event.code.toLowerCase() === 'space') {
-  //       polylineDrawerRef.current?.finish();
-  //       polylineDrawerRef.current?.dispose();
-  //       polylineDrawerRef.current = null;
-  //       setMode(EMode.select);
-  //     }
-  //   },
-  //   [setMode],
-  // );
+      anno.onFocus();
+      focusedAnnoRef.current = anno;
+    },
+    [cleanFocusedAnnoRef],
+  );
 
   useEffect(() => {
     const divDom = divRef.current;
     if (!divDom || mode !== EMode.select) return;
 
     divDom.addEventListener('mousemove', mousemoveHandler);
-    // divDom.addEventListener('click', clickHandler);
-    // divDom.addEventListener('keydown', keydownHandler);
+    divDom.addEventListener('click', clickHandler);
 
     return () => {
       divDom.removeEventListener('mousemove', mousemoveHandler);
-      // divDom.removeEventListener('click', clickHandler);
-      // divDom.removeEventListener('keydown', keydownHandler);
+      divDom.removeEventListener('click', clickHandler);
     };
-  }, [mousemoveHandler, mode, divRef]);
+  }, [mousemoveHandler, clickHandler, mode, divRef]);
 
   return rayCasterRef;
 };

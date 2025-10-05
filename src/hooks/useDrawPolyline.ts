@@ -2,10 +2,12 @@ import { useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import { EMode } from '../interface';
 import { PolylineDrawer } from '../three/object/PolylineDrawer';
+import { Polyline } from '../three/object/Polyline';
 
 export const useDrawPolyline = (
   divRef: React.RefObject<HTMLDivElement | null>,
   rayCasterRef: React.RefObject<THREE.Raycaster>,
+  [, setAnnos]: [Polyline[], React.Dispatch<React.SetStateAction<Polyline[]>>],
   [mode, setMode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
   const polylineDrawerRef = useRef<PolylineDrawer | null>(null);
@@ -51,13 +53,14 @@ export const useDrawPolyline = (
   const keydownHandler = useCallback(
     function (event: KeyboardEvent) {
       if (event.code.toLowerCase() === 'space') {
-        polylineDrawerRef.current?.finish();
+        const polyline = polylineDrawerRef.current!.finish();
+        setAnnos((pre) => [...pre, polyline]);
         polylineDrawerRef.current?.dispose();
         polylineDrawerRef.current = null;
         setMode(EMode.select);
       }
     },
-    [setMode],
+    [setMode, setAnnos],
   );
 
   useEffect(() => {
