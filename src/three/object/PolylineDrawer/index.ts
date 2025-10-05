@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { scene } from '../scene';
+import { scene } from '../../scene';
 import { nanoid } from 'nanoid';
-import { DataBase } from '../../DataBase';
+import { DataBase } from '../../../DataBase';
+import { Polyline } from '../Polyline';
 
 export class PolylineDrawer {
   private line: THREE.Line;
@@ -55,10 +56,19 @@ export class PolylineDrawer {
 
   public finish() {
     const array = this.line.geometry.attributes.position.array;
+    const points: [number, number, number][] = [];
+    for (let i = 0; i < array.length; i += 3) {
+      points.push([
+        Number(array[i]),
+        Number(array[i + 1]),
+        Number(array[i + 2]),
+      ]);
+    }
     DataBase.insert({
       id: nanoid(6),
-      points: array,
+      points,
     });
+    Polyline.create(points);
   }
 
   public dispose() {
@@ -78,7 +88,7 @@ export class PolylineDrawer {
   }
 
   private createLineMaterial() {
-    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
     return material;
   }
 

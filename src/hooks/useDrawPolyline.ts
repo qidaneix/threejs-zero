@@ -2,7 +2,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import { findLinePlaneIntersection } from '../utils/findLinePlaneIntersection';
 import { EMode } from '../interface';
-import { PolylineDrawer } from '../three/PolylineDrawer';
+import { PolylineDrawer } from '../three/object/PolylineDrawer';
 
 export const useDrawPolyline = (
   divRef: React.RefObject<HTMLDivElement | null>,
