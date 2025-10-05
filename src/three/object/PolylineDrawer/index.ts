@@ -1,8 +1,10 @@
 import * as THREE from 'three';
-import { scene } from '../../scene';
+import { objectsGroup } from '../../scene/group';
 import { nanoid } from 'nanoid';
 import { DataBase } from '../../../DataBase';
 import { Polyline } from '../Polyline';
+import { EObject } from '../../../interface';
+import { drawersGroup } from '../../scene/group';
 
 export class PolylineDrawer {
   private line: THREE.Line;
@@ -18,7 +20,7 @@ export class PolylineDrawer {
     const pointsMaterial = this.createPointsMaterial();
     this.points = new THREE.Points(geometry, pointsMaterial);
 
-    scene.add(this.line, this.points);
+    drawersGroup.add(this.line, this.points);
   }
 
   public updateLastPoint(point: THREE.Vector3) {
@@ -67,12 +69,14 @@ export class PolylineDrawer {
     DataBase.insert({
       id: nanoid(6),
       points,
+      type: EObject.polyline,
     });
-    Polyline.create(points);
+    const polyline = Polyline.create(points);
+    objectsGroup.add(polyline.getObject3D());
   }
 
   public dispose() {
-    scene.remove(this.line, this.points);
+    drawersGroup.remove(this.line, this.points);
   }
 
   private createGeometry(point: THREE.Vector3) {

@@ -7,3 +7,8 @@ export enum EMode {
   rotate = 'rotate',
   scale = 'scale',
 }
+
+export enum EObject {
+  polyline,
+  box,
+}
