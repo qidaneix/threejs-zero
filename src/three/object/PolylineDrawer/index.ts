@@ -66,12 +66,13 @@ export class PolylineDrawer {
         Number(array[i + 2]),
       ]);
     }
+    const id = nanoid(6);
     DataBase.insert({
-      id: nanoid(6),
+      id,
       points,
       type: EObject.polyline,
     });
-    const polyline = Polyline.create(points);
+    const polyline = Polyline.create({ id, points });
     objectsGroup.add(polyline.getObject3D());
   }
 

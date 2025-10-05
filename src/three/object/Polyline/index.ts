@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { objectsGroup } from '../../scene/group';
 
 export class Polyline {
+  private id: string;
+
   private line: THREE.Line;
 
   private readonly color = new THREE.Color(0x84692f);
@@ -10,7 +12,8 @@ export class Polyline {
 
   private readonly focusColor = new THREE.Color(0xffffff);
 
-  constructor(points: THREE.Vector3[]) {
+  constructor({ id, points }: { id: string; points: THREE.Vector3[] }) {
+    this.id = id;
     const position = new Float32Array(points.flatMap((p) => [p.x, p.y, p.z]));
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
@@ -20,10 +23,16 @@ export class Polyline {
     this.line = new THREE.Line(geometry, material);
   }
 
-  public static create(points: [number, number, number][]) {
+  public static create({
+    id,
+    points,
+  }: {
+    id: string;
+    points: [number, number, number][];
+  }) {
     const ps = points.map((i) => new THREE.Vector3(i[0], i[1], i[2]));
 
-    return new Polyline(ps);
+    return new Polyline({ id, points: ps });
   }
 
   public onHover() {
@@ -52,5 +61,9 @@ export class Polyline {
 
   public getObject3D() {
     return this.line;
+  }
+
+  public getId() {
+    return this.id;
   }
 }

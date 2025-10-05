@@ -12,9 +12,10 @@ export const useInit = () => {
     list.forEach((obj) => {
       switch (obj.type) {
         case EObject.polyline: {
-          const polyline = Polyline.create(
-            obj.points as [number, number, number][],
-          );
+          const polyline = Polyline.create({
+            id: obj.id as string,
+            points: obj.points as [number, number, number][],
+          });
           objectsGroup.add(polyline.getObject3D());
           annos.push(polyline);
           break;
