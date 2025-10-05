@@ -74,6 +74,7 @@ export class PolylineDrawer {
     });
     const polyline = Polyline.create({ id, points });
     objectsGroup.add(polyline.getObject3D());
+    return polyline;
   }
 
   public dispose() {
