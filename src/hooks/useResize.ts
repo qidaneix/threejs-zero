@@ -18,7 +18,7 @@ export const useResize = (divRef: React.RefObject<HTMLDivElement | null>) => {
           // 更新渲染器尺寸
           renderer.setSize(width, height);
         }
-      }, 300),
+      }, 100),
     );
   }, []);
 
