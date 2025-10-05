@@ -13,7 +13,7 @@ export const useSelect = (
   [mode, setMode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
   const hoveredAnnoRef = useRef<Polyline | null>(null);
-  // const focusedAnno = useRef<Polyline | null>(null);
+  const focusedAnnoRef = useRef<Polyline | null>(null);
 
   const cleanHoveredAnnoRef = useCallback(() => {
     const preAnno = hoveredAnnoRef.current;
