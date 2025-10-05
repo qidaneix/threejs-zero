@@ -1,6 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
-import { findLinePlaneIntersection } from '../utils/findLinePlaneIntersection';
 import { EMode } from '../interface';
 import { PolylineDrawer } from '../three/object/PolylineDrawer';
 
@@ -10,6 +9,8 @@ export const useDrawPolyline = (
   [mode, setMode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
   const polylineDrawerRef = useRef<PolylineDrawer | null>(null);
+  const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const intersectionRef = useRef(new THREE.Vector3(0, 1, 0));
 
   useEffect(() => {
     if (mode === EMode.drawPolyline) {
@@ -26,31 +27,25 @@ export const useDrawPolyline = (
   const mousemoveHandler = useCallback(
     function () {
       const rayCaster = rayCasterRef.current;
+      const { ray } = rayCaster;
       const polylineDrawer = polylineDrawerRef.current;
+      const plane = planeRef.current;
+      const intersection = intersectionRef.current;
 
-      const ray = rayCaster.ray;
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const intersection = findLinePlaneIntersection(ray, plane);
+      ray.intersectPlane(plane, intersection);
 
-      if (intersection) polylineDrawer?.updateLastPoint(intersection);
+      polylineDrawer?.updateLastPoint(intersection);
     },
     [rayCasterRef],
   );
 
   // 鼠标点击
-  const clickHandler = useCallback(
-    function () {
-      const rayCaster = rayCasterRef.current;
-      const polylineDrawer = polylineDrawerRef.current;
+  const clickHandler = useCallback(function () {
+    const polylineDrawer = polylineDrawerRef.current;
+    const intersection = intersectionRef.current;
 
-      const ray = rayCaster.ray;
-      const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-      const intersection = findLinePlaneIntersection(ray, plane);
-
-      if (intersection) polylineDrawer?.addPoint(intersection);
-    },
-    [rayCasterRef],
-  );
+    polylineDrawer?.addPoint(intersection);
+  }, []);
 
   // 完成绘制
   const keydownHandler = useCallback(

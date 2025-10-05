@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 /**
+ * @deprecated
  * 计算射线与平面的交点
  * @param {THREE.Ray} ray 射线（使用 THREE.Ray 实例，包含起点和方向向量）
  * @param {THREE.Plane} plane 平面（使用 THREE.Plane 实例，包含法向量和常数项）

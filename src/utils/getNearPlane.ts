@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
-// 函数：获取相机的近平面
+/**
+ * @deprecated
+ * 函数：获取相机的近平面
+ */
 export function getNearPlane(camera: THREE.PerspectiveCamera) {
   // 获取相机的世界方向
   const direction = new THREE.Vector3();

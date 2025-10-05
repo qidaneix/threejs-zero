@@ -1,9 +1,10 @@
 import { useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import { Polyline } from '../three/object/Polyline';
-import { findLinePlaneIntersection } from '../utils/findLinePlaneIntersection';
 import { EMode } from '../interface';
 import { objectsGroup } from '../three/scene/group';
+import { filterIntersections } from '../utils/filterIntersections';
+import { camera } from '../three/camera';
 
 export const useSelect = (
   divRef: React.RefObject<HTMLDivElement | null>,
@@ -22,16 +23,22 @@ export const useSelect = (
 
   // 鼠标hover
   const mousemoveHandler = useCallback(
-    function () {
+    function (event: MouseEvent) {
       cleanHoveredAnnoRef();
 
       const rayCaster = rayCasterRef.current;
       const objects = objectsGroup.children as THREE.Object3D[];
 
-      const intersects = rayCaster.intersectObjects(objects);
-      if (!intersects?.length) return;
+      const intersections = rayCaster.intersectObjects(objects);
+      const filteredIntersections = filterIntersections(
+        intersections,
+        camera,
+        event,
+        divRef.current!,
+      );
+      if (!filteredIntersections?.length) return;
 
-      const hoveredObject3D = intersects[0].object;
+      const hoveredObject3D = filteredIntersections[0].object;
       const anno = annos.find(
         (i) => i.getObject3D().uuid === hoveredObject3D.uuid,
       );
@@ -40,7 +47,7 @@ export const useSelect = (
       anno.onHover();
       hoveredAnnoRef.current = anno;
     },
-    [rayCasterRef, annos, cleanHoveredAnnoRef],
+    [rayCasterRef, annos, cleanHoveredAnnoRef, divRef],
   );
 
   // 鼠标点击
