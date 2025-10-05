@@ -4,7 +4,7 @@
 export class DataBase {
   private static readonly KEY = 'objects';
 
-  private static connect() {
+  private static connect(): Record<string, unknown>[] {
     try {
       const str = localStorage.getItem(this.KEY);
       if (!str) throw new Error('no str');

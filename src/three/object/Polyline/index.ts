@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene } from '../../scene';
+import { objectsGroup } from '../../scene/group';
 
 export class Polyline {
   private line: THREE.Line;
@@ -18,27 +18,39 @@ export class Polyline {
       color: this.color,
     });
     this.line = new THREE.Line(geometry, material);
-
-    scene.add(this.line);
   }
 
   public static create(points: [number, number, number][]) {
     const ps = points.map((i) => new THREE.Vector3(i[0], i[1], i[2]));
 
-    const polyline = new Polyline(ps);
+    return new Polyline(ps);
   }
 
   public onHover() {
     const material = this.line.material;
-    (material as THREE.LineBasicMaterial).color = this.hoverColor;
+    (material as THREE.LineBasicMaterial).color.set(this.hoverColor);
+  }
+
+  public offHover() {
+    const material = this.line.material;
+    (material as THREE.LineBasicMaterial).color.set(this.color);
   }
 
   public onFocus() {
     const material = this.line.material;
-    (material as THREE.LineBasicMaterial).color = this.focusColor;
+    (material as THREE.LineBasicMaterial).color.set(this.focusColor);
+  }
+
+  public offFocus() {
+    const material = this.line.material;
+    (material as THREE.LineBasicMaterial).color.set(this.color);
   }
 
   public dispose() {
-    scene.remove(this.line);
+    objectsGroup.remove(this.line);
+  }
+
+  public getObject3D() {
+    return this.line;
   }
 }

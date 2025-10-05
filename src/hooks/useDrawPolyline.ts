@@ -47,7 +47,6 @@ export const useDrawPolyline = (
       const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
       const intersection = findLinePlaneIntersection(ray, plane);
 
-      console.log('intersection', intersection);
       if (intersection) polylineDrawer?.addPoint(intersection);
     },
     [rayCasterRef],
