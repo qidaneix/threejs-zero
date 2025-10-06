@@ -2,9 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 import { camera } from '../three/camera';
 
-export const useRayCaster = (
-  divRef: React.RefObject<HTMLDivElement | null>,
-) => {
+export const useRayCaster = (divRef: React.RefObject<HTMLDivElement | null>) => {
   const rayCasterRef = useRef(new THREE.Raycaster());
 
   // 鼠标移动
@@ -16,10 +14,7 @@ export const useRayCaster = (
     const rayCaster = rayCasterRef.current;
 
     // 原坐标
-    const originMouse = new THREE.Vector2(
-      event.clientX - rect.left,
-      event.clientY - rect.top,
-    );
+    const mouse = new THREE.Vector2(event.clientX - rect.left, event.clientY - rect.top);
     // 转换矩阵
     /* prettier-ignore */
     const matrix = new THREE.Matrix3(
@@ -29,7 +24,7 @@ export const useRayCaster = (
       );
     /* prettier-ignore */
     // 目标坐标
-    const mouse = originMouse.clone().applyMatrix3(matrix);
+    mouse.applyMatrix3(matrix);
     rayCaster.setFromCamera(mouse, camera);
   }, []);
 

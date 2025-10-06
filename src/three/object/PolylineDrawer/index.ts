@@ -34,37 +34,22 @@ export class PolylineDrawer {
       point.z,
     ]);
     // 更新
-    geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(newPositions, 3),
-    );
+    geometry.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
   }
 
   public addPoint(point: THREE.Vector3) {
     const geometry = this.line.geometry;
     const positions = geometry.attributes.position.array;
-    const newPositions = new Float32Array([
-      ...positions,
-      point.x,
-      point.y,
-      point.z,
-    ]);
+    const newPositions = new Float32Array([...positions, point.x, point.y, point.z]);
     // 加点
-    geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(newPositions, 3),
-    );
+    geometry.setAttribute('position', new THREE.BufferAttribute(newPositions, 3));
   }
 
   public finish() {
     const array = this.line.geometry.attributes.position.array;
     const points: [number, number, number][] = [];
     for (let i = 0; i < array.length; i += 3) {
-      points.push([
-        Number(array[i]),
-        Number(array[i + 1]),
-        Number(array[i + 2]),
-      ]);
+      points.push([Number(array[i]), Number(array[i + 1]), Number(array[i + 2])]);
     }
     const id = nanoid(6);
     DataBase.insert({
@@ -73,7 +58,7 @@ export class PolylineDrawer {
       type: EObject.polyline,
     });
     const polyline = Polyline.create({ id, points });
-    objectsGroup.add(polyline.getObject3D());
+    objectsGroup.add(polyline.getLine());
     return polyline;
   }
 
@@ -85,10 +70,7 @@ export class PolylineDrawer {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
       'position',
-      new THREE.BufferAttribute(
-        new Float32Array([point.x, point.y, point.z]),
-        3,
-      ),
+      new THREE.BufferAttribute(new Float32Array([point.x, point.y, point.z]), 3),
     );
     return geometry;
   }

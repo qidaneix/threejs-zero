@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { objectsGroup } from '../../scene/group';
+import { transformControls } from '../../controls/transform';
 
 export class Polyline {
   private id: string;
@@ -37,11 +38,17 @@ export class Polyline {
   }
 
   public onHover() {
+    if (this.isFocused) return;
+
+    // 变色
     const material = this.line.material as THREE.LineBasicMaterial;
     material.color.set(this.hoverColor);
   }
 
   public offHover() {
+    if (this.isFocused) return;
+
+    // 变色
     const material = this.line.material as THREE.LineBasicMaterial;
     material.color.set(this.color);
   }
@@ -64,6 +71,8 @@ export class Polyline {
   }
 
   public offFocus() {
+    this.isFocused = false;
+    transformControls.detach();
     // 还原
     const material = this.line.material as THREE.LineBasicMaterial;
     material.color.set(this.color);
@@ -80,12 +89,16 @@ export class Polyline {
     objectsGroup.remove(this.line);
   }
 
-  public getObject3D() {
+  public getLine() {
     return this.line;
   }
 
   public getId() {
     return this.id;
+  }
+
+  public getSprites() {
+    return this.sprites;
   }
 
   private createSprite(point: THREE.Vector3) {
@@ -112,7 +125,7 @@ export class Polyline {
     // 将 Canvas 转为 three.js 纹理
     const gridTexture = new THREE.CanvasTexture(canvas);
 
-    // 6. 创建精灵材质（确保粒子永远朝向屏幕）
+    // 创建精灵材质（确保粒子永远朝向屏幕）
     const material = new THREE.SpriteMaterial({
       map: gridTexture, // 应用小方格纹理
       color: new THREE.Color(0xff0000), // 粒子颜色（蓝色，可调整）
