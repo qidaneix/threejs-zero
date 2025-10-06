@@ -16,7 +16,7 @@ export const useInit = () => {
             id: obj.id as string,
             points: obj.points as [number, number, number][],
           });
-          objectsGroup.add(polyline.getObject3D());
+          objectsGroup.add(polyline.getLine());
           annos.push(polyline);
           break;
         }

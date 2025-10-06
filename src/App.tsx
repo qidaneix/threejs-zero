@@ -7,6 +7,7 @@ import { useRayCaster } from './hooks/useRayCaster';
 import { useDrawPolyline } from './hooks/useDrawPolyline';
 import { useInit } from './hooks/useInit';
 import { useSelect } from './hooks/useSelect';
+import { useTransformPolyline } from './hooks/useTransformPolyline';
 import { Polyline } from './three/object/Polyline';
 
 const { domElement } = renderer;
@@ -28,7 +29,8 @@ const App = () => {
   useResize(ref);
   const rayCasterRef = useRayCaster(ref);
   const [mode, setMode] = useSwitchMode(ref);
-  useSelect(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
+  const focusedAnnoRef = useSelect(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
+  useTransformPolyline(ref, rayCasterRef, focusedAnnoRef, [annos, setAnnos], [mode, setMode]);
   useDrawPolyline(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
 
   return (
