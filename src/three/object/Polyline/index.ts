@@ -6,6 +6,8 @@ export class Polyline {
 
   private line: THREE.Line;
 
+  private isFocused: boolean;
+
   private readonly color = new THREE.Color(0x84692f);
 
   private readonly hoverColor = new THREE.Color(0xffff00);
