@@ -1,20 +1,18 @@
 import { useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
-import { Polyline } from '../three/object/Polyline';
+import type { IAnno } from '../interface';
 import { EMode } from '../interface';
 import { objectsGroup } from '../three/scene/group';
 import { transformControls } from '../three/controls/transform';
-import { filterIntersections } from '../utils/filterIntersections';
-import { camera } from '../three/camera';
 
 export const useSelect = (
   divRef: React.RefObject<HTMLDivElement | null>,
   rayCasterRef: React.RefObject<THREE.Raycaster>,
-  [annos]: [Polyline[], React.Dispatch<React.SetStateAction<Polyline[]>>],
+  [annos]: [IAnno[], React.Dispatch<React.SetStateAction<IAnno[]>>],
   [mode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
-  const hoveredAnnoRef = useRef<Polyline | null>(null);
-  const focusedAnnoRef = useRef<Polyline | null>(null);
+  const hoveredAnnoRef = useRef<IAnno | null>(null);
+  const focusedAnnoRef = useRef<IAnno | null>(null);
 
   const cleanHoveredAnnoRef = useCallback(() => {
     const preAnno = hoveredAnnoRef.current;

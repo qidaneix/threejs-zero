@@ -1,5 +1,3 @@
-import { debounce } from 'lodash';
-import * as THREE from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { camera } from '../../camera';
 import { renderer } from '../../renderer';

@@ -2,21 +2,21 @@ import { useEffect, useCallback, useRef } from 'react';
 import * as THREE from 'three';
 import type { IAnno } from '../interface';
 import { EMode } from '../interface';
-import { PolylineDrawer } from '../three/object/PolylineDrawer';
+import { CuboidDrawer } from '../three/object/CuboidDrawer';
 
-export const useDrawPolyline = (
+export const useDrawCuboid = (
   divRef: React.RefObject<HTMLDivElement | null>,
   rayCasterRef: React.RefObject<THREE.Raycaster>,
   [, setAnnos]: [IAnno[], React.Dispatch<React.SetStateAction<IAnno[]>>],
   [mode, setMode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
-  const drawerRef = useRef<PolylineDrawer | null>(null);
+  const drawerRef = useRef<CuboidDrawer | null>(null);
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
   const intersectionRef = useRef(new THREE.Vector3(0, 1, 0));
 
   useEffect(() => {
-    if (mode === EMode.drawPolyline) {
-      drawerRef.current = new PolylineDrawer(new THREE.Vector3(0, 0, 0));
+    if (mode === EMode.drawCuboid) {
+      drawerRef.current = new CuboidDrawer(new THREE.Vector3(0, 0, 0));
     } else {
       drawerRef.current?.dispose();
       drawerRef.current = null;
@@ -28,31 +28,31 @@ export const useDrawPolyline = (
     function () {
       const rayCaster = rayCasterRef.current;
       const { ray } = rayCaster;
-      const polylineDrawer = drawerRef.current;
+      const cuboidDrawer = drawerRef.current;
       const plane = planeRef.current;
       const intersection = intersectionRef.current;
 
       ray.intersectPlane(plane, intersection);
 
-      polylineDrawer?.updateLastPoint(intersection);
+      cuboidDrawer?.updateLastPoint(intersection);
     },
     [rayCasterRef],
   );
 
   // 鼠标点击
   const clickHandler = useCallback(function () {
-    const polylineDrawer = drawerRef.current;
+    const cuboidDrawer = drawerRef.current;
     const intersection = intersectionRef.current;
 
-    polylineDrawer?.addPoint(intersection);
+    cuboidDrawer?.addPoint(intersection);
   }, []);
 
   // 完成绘制
   const keydownHandler = useCallback(
     function (event: KeyboardEvent) {
       if (event.code.toLowerCase() === 'space') {
-        const polyline = drawerRef.current!.finish();
-        setAnnos((pre) => [...pre, polyline]);
+        const cuboid = drawerRef.current!.finish();
+        setAnnos((pre) => [...pre, cuboid]);
         drawerRef.current?.dispose();
         drawerRef.current = null;
         setMode(EMode.select);
@@ -63,7 +63,7 @@ export const useDrawPolyline = (
 
   useEffect(() => {
     const divDom = divRef.current;
-    if (!divDom || mode !== EMode.drawPolyline) return;
+    if (!divDom || mode !== EMode.drawCuboid) return;
 
     divDom.addEventListener('mousemove', mousemoveHandler);
     divDom.addEventListener('click', clickHandler);
