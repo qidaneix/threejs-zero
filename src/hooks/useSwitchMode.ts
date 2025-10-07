@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { EMode } from '../interface';
 
-export const useSwitchMode = (
-  divRef: React.RefObject<HTMLDivElement | null>,
-) => {
+export const useSwitchMode = (divRef: React.RefObject<HTMLDivElement | null>) => {
   const [mode, setMode] = useState<EMode>(EMode.select);
 
   // 键盘快捷键
@@ -26,8 +24,8 @@ export const useSwitchMode = (
         setMode(EMode.drawPolyline);
         break;
       }
-      case 'b': {
-        setMode(EMode.drawBox);
+      case 'c': {
+        setMode(EMode.drawCuboid);
         break;
       }
     }

@@ -3,6 +3,7 @@ import { objectsGroup } from '../../scene/group';
 import { nanoid } from 'nanoid';
 import { DataBase } from '../../../DataBase';
 import { Polyline } from '../Polyline';
+import type { IPoint } from '../../../interface';
 import { EObject } from '../../../interface';
 import { drawersGroup } from '../../scene/group';
 
@@ -46,11 +47,12 @@ export class PolylineDrawer {
   }
 
   public finish() {
-    const array = this.line.geometry.attributes.position.array;
-    const points: [number, number, number][] = [];
-    for (let i = 0; i < array.length; i += 3) {
-      points.push([Number(array[i]), Number(array[i + 1]), Number(array[i + 2])]);
+    const positionAttr = this.line.geometry.attributes.position;
+    const points: IPoint[] = [];
+    for (let i = 0; i < positionAttr.count - 1; i += 1) {
+      points.push([positionAttr.getX(i), positionAttr.getY(i), positionAttr.getZ(i)]);
     }
+
     const id = nanoid(6);
     DataBase.insert({
       id,
@@ -68,10 +70,8 @@ export class PolylineDrawer {
 
   private createGeometry(point: THREE.Vector3) {
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(new Float32Array([point.x, point.y, point.z]), 3),
-    );
+    geometry.setFromPoints([point]);
+
     return geometry;
   }
 

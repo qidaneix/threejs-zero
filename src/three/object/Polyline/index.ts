@@ -1,21 +1,22 @@
 import * as THREE from 'three';
 import { objectsGroup } from '../../scene/group';
 import { transformControls } from '../../controls/transform';
+import type { IPoint } from '../../../interface';
 
 export class Polyline {
   private id: string;
 
-  private line: THREE.Line;
-
   private isFocused: boolean = false;
+
+  private line: THREE.Line;
 
   private sprites: THREE.Sprite[] = [];
 
-  private readonly color = new THREE.Color(0x84692f);
+  private readonly color = new THREE.Color(0x00ffff);
 
   private readonly hoverColor = new THREE.Color(0xffff00);
 
-  private readonly focusColor = new THREE.Color(0xffffff);
+  private readonly focusColor = new THREE.Color(0xff00ff);
 
   private readonly spriteMaterial: THREE.SpriteMaterial;
 
@@ -31,7 +32,7 @@ export class Polyline {
     this.spriteMaterial = this.createSpriteMaterial();
   }
 
-  public static create({ id, points }: { id: string; points: [number, number, number][] }) {
+  public static create({ id, points }: { id: string; points: IPoint[] }) {
     const ps = points.map((i) => new THREE.Vector3(i[0], i[1], i[2]));
 
     return new Polyline({ id, points: ps });

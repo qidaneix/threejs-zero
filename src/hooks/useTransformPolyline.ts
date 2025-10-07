@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { EMode, EObject } from '../interface';
+import type { IAnno } from '../interface';
 import { Polyline } from '../three/object/Polyline';
 import { transformControls } from '../three/controls/transform';
 import { DataBase } from '../DataBase';
@@ -8,14 +9,12 @@ import { DataBase } from '../DataBase';
 export const useTransformPolyline = (
   divRef: React.RefObject<HTMLDivElement | null>,
   rayCasterRef: React.RefObject<THREE.Raycaster>,
-  focusedAnnoRef: React.RefObject<Polyline | null>,
-  [annos]: [Polyline[], React.Dispatch<React.SetStateAction<Polyline[]>>],
+  focusedAnnoRef: React.RefObject<IAnno | null>,
   [mode]: [EMode, React.Dispatch<React.SetStateAction<EMode>>],
 ) => {
   // 移动Sprite
   const objectChangeHandler = useCallback(
-    function (event) {
-      console.log('objectChange', event);
+    function (event: THREE.Event) {
       const transformControls = event.target;
       const { object } = transformControls;
       const focusedAnno = focusedAnnoRef.current;
