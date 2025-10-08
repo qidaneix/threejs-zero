@@ -1,29 +1,11 @@
-# Rsbuild Project
+# 3D画板
 
-## Setup
+1. 3D画板界面，带有坐标系/XZ平面网格/轨道控制器
+2. `ctrl+D`切换到绘制折线，单击网格平面绘制
+3. `ctrl+C`切换到绘制立方体，单击网格平面绘制
+4. `ctrl+P`切换到选中模式，可以选中绘制的物体
+5. 单击折线选中折线，再单击选中的折线的折点可以移动折点位置
+6. 单击立方体选中立方体，并对立方体进行操作，`t`移动，`r`旋转，`s`缩放
+7. 所有的绘制/修改操作，都能即时保存到localStorage中
 
-Install the dependencies:
-
-```bash
-pnpm install
-```
-
-## Get Started
-
-Start the dev server:
-
-```bash
-pnpm dev
-```
-
-Build the app for production:
-
-```bash
-pnpm build
-```
-
-Preview the production build locally:
-
-```bash
-pnpm preview
-```
+enjoy!

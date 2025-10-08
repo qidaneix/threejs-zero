@@ -1,0 +1,27 @@
+# .editorconfig
+
+# 根文件标识，表示这是项目根目录的 EditorConfig 文件
+root = true
+
+# 所有文件的默认设置
+[*]
+# 使用 Unix 风格换行符（\n），适用于 macOS/Linux/Windows 统一
+end_of_line = lf
+
+# 确保文件以换行符结尾
+insert_final_newline = true
+
+# 删除行尾的空格
+trim_trailing_whitespace = true
+
+# 使用空格进行缩进（而不是 Tab）
+indent_style = space
+
+# 缩进为 2 个空格（适用于 JS/TS/JSON/YAML 等）
+indent_size = 2
+
+# 字符集为 UTF-8
+charset = utf-8
+
+# 每行最大宽度
+max_line_length = 100

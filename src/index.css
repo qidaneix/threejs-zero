@@ -10,3 +10,23 @@ body {
   width: 100%;
   height: 100%;
 }
+.app {
+  width: 100%;
+  height: 100%;
+  outline: none;
+  position: relative;
+}
+.tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+}
+.piece {
+  width: 4px;
+  height: 4px;
+  background-color: black;
+  position: absolute;
+  z-index: 10;
+  transform: translate(-2px, -2px);
+}
