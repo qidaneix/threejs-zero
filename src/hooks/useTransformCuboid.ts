@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import * as THREE from 'three';
 import { EMode, EObject } from '../interface';
-import type { IAnno } from '../interface';
+import type { IAnno, I4Points } from '../interface';
 import { Cuboid } from '../three/object/Cuboid';
 import { transformControls } from '../three/controls/transform';
 import { DataBase } from '../DataBase';
@@ -20,20 +20,19 @@ export const useTransformCuboid = (
       const transformControls = event.target;
       const { object } = transformControls;
       if (object instanceof THREE.Mesh) {
-        console.log('event', event);
-        // const newVector = object.position.clone();
-        // // 更新line
-        // const line = focusedAnno.getLine();
-        // const array = line.geometry.attributes.position.array;
-        // array[index * 3] = newVector.x;
-        // array[index * 3 + 1] = newVector.y;
-        // array[index * 3 + 2] = newVector.z;
-        // line.geometry.setAttribute('position', new THREE.BufferAttribute(array, 3));
-        // const points: [number, number, number][] = [];
-        // for (let i = 0; i < array.length; i += 3) {
-        //   points.push([Number(array[i]), Number(array[i + 1]), Number(array[i + 2])]);
-        // }
-        // DataBase.update(focusedAnno.getId(), { points, type: EObject.polyline });
+        const transformMatrix = object.matrix.clone();
+        const p0 = new THREE.Vector3(0.5, 0.5, 0.5);
+        const p1 = new THREE.Vector3(0.5, -0.5, 0.5);
+        const p2 = new THREE.Vector3(0.5, -0.5, -0.5);
+        const p6 = new THREE.Vector3(-0.5, -0.5, -0.5);
+        p0.applyMatrix4(transformMatrix);
+        p1.applyMatrix4(transformMatrix);
+        p2.applyMatrix4(transformMatrix);
+        p6.applyMatrix4(transformMatrix);
+
+        const points: I4Points = [p0, p1, p2, p6].map((p) => [p.x, p.y, p.z]);
+
+        DataBase.update(focusedAnno.getId(), { points, type: EObject.cuboid });
       }
     },
     [focusedAnnoRef],
