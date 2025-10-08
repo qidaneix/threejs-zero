@@ -12,7 +12,7 @@ export function computeTransformationMatrix(vertices: I4Vector4s, epsilon = 1e-6
   const v2 = new THREE.Vector3().subVectors(p6, p2);
   const v3 = new THREE.Vector3().subVectors(p2, p1);
 
-  if ([v1.dot(v2), v2.dot(v3), v3.dot(v1)].some((i) => Math.abs(i) < epsilon)) {
+  if ([v1.dot(v2), v2.dot(v3), v3.dot(v1)].some((i) => Math.abs(i) > epsilon)) {
     throw new Error('无法从给定的顶点中找到三个互相垂直的向量，它们可能不构成长方体');
   }
 

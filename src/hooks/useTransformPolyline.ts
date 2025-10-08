@@ -15,11 +15,11 @@ export const useTransformPolyline = (
   // 移动Sprite
   const objectChangeHandler = useCallback(
     function (event: THREE.Event) {
+      const focusedAnno = focusedAnnoRef.current;
+      if (!(focusedAnno instanceof Polyline)) return;
+
       const transformControls = event.target;
       const { object } = transformControls;
-      const focusedAnno = focusedAnnoRef.current;
-      if (!focusedAnno) throw new Error('sth wrong');
-
       const index = focusedAnno.getSprites().indexOf(object);
       if (object instanceof THREE.Sprite && index !== -1) {
         const newVector = object.position.clone();
@@ -57,6 +57,7 @@ export const useTransformPolyline = (
 
       transformControls.detach();
       transformControls.attach(sprite);
+      transformControls.setMode('translate');
     },
     [focusedAnnoRef, rayCasterRef],
   );

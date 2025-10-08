@@ -11,6 +11,7 @@ export class Cuboid {
 
   private box: THREE.Mesh;
 
+  // TODO
   // private lineSegments: THREE.LineSegments;
 
   private readonly color = new THREE.Color(0x00ffff);
@@ -70,16 +71,16 @@ export class Cuboid {
     material.color.set(this.color);
   }
 
-  public onSpriteMove() {
-    // TODO
-  }
-
   public dispose() {
     objectsGroup.remove(this.box);
   }
 
   public getMash() {
     return this.box;
+  }
+
+  public getObject3D() {
+    return this.getMash();
   }
 
   public getId() {

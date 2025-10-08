@@ -4,6 +4,7 @@ import type { IAnno } from '../interface';
 import { EMode } from '../interface';
 import { objectsGroup } from '../three/scene/group';
 import { transformControls } from '../three/controls/transform';
+import { Cuboid } from '../three/object/Cuboid';
 
 export const useSelect = (
   divRef: React.RefObject<HTMLDivElement | null>,
@@ -48,7 +49,7 @@ export const useSelect = (
       // const hoveredObject3D = filteredIntersections[0].object;
 
       const hoveredObject3D = intersections[0].object;
-      const anno = annos.find((i) => i.getLine().uuid === hoveredObject3D.uuid);
+      const anno = annos.find((i) => i.getObject3D().uuid === hoveredObject3D.uuid);
       if (!anno) return;
 
       anno.onHover();
@@ -70,6 +71,10 @@ export const useSelect = (
 
       anno.onFocus();
       focusedAnnoRef.current = anno;
+
+      if (anno instanceof Cuboid) {
+        transformControls.attach(anno.getMash());
+      }
     },
     [cleanFocusedAnnoRef],
   );

@@ -94,6 +94,10 @@ export class Polyline {
     return this.line;
   }
 
+  public getObject3D() {
+    return this.getLine();
+  }
+
   public getId() {
     return this.id;
   }
