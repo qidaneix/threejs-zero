@@ -39,18 +39,16 @@ export const useDrawCuboid = (
     [rayCasterRef],
   );
 
-  // 鼠标点击
-  const clickHandler = useCallback(function () {
-    const cuboidDrawer = drawerRef.current;
-    const intersection = intersectionRef.current;
+  // 鼠标点击 + 完成绘制
+  const clickHandler = useCallback(
+    function () {
+      const cuboidDrawer = drawerRef.current;
+      const intersection = intersectionRef.current;
 
-    cuboidDrawer?.addPoint(intersection);
-  }, []);
+      cuboidDrawer?.addPoint(intersection);
 
-  // 完成绘制
-  const keydownHandler = useCallback(
-    function (event: KeyboardEvent) {
-      if (event.code.toLowerCase() === 'space') {
+      const pointsCount = cuboidDrawer?.getPointsCount();
+      if (typeof pointsCount === 'number' && pointsCount > 3) {
         const cuboid = drawerRef.current!.finish();
         setAnnos((pre) => [...pre, cuboid]);
         drawerRef.current?.dispose();
@@ -58,7 +56,7 @@ export const useDrawCuboid = (
         setMode(EMode.select);
       }
     },
-    [setMode, setAnnos],
+    [setAnnos, setMode],
   );
 
   useEffect(() => {
@@ -67,14 +65,12 @@ export const useDrawCuboid = (
 
     divDom.addEventListener('mousemove', mousemoveHandler);
     divDom.addEventListener('click', clickHandler);
-    divDom.addEventListener('keydown', keydownHandler);
 
     return () => {
       divDom.removeEventListener('mousemove', mousemoveHandler);
       divDom.removeEventListener('click', clickHandler);
-      divDom.removeEventListener('keydown', keydownHandler);
     };
-  }, [clickHandler, mousemoveHandler, keydownHandler, mode, divRef]);
+  }, [clickHandler, mousemoveHandler, mode, divRef]);
 
   return rayCasterRef;
 };
