@@ -14,7 +14,7 @@ export class CuboidDrawer {
 
   private lineLoop: THREE.LineLoop;
 
-  private readonly defaultHeight = 10;
+  private readonly defaultHeight = 0.5;
 
   constructor(initPoint: THREE.Vector3) {
     const geometry = this.createGeometry(initPoint);

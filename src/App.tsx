@@ -9,6 +9,7 @@ import { useDrawCuboid } from './hooks/useDrawCuboid';
 import { useInit } from './hooks/useInit';
 import { useSelect } from './hooks/useSelect';
 import { useTransformPolyline } from './hooks/useTransformPolyline';
+import { useTransformCuboid } from './hooks/useTransformCuboid';
 import type { IAnno } from './interface';
 
 const { domElement } = renderer;
@@ -32,6 +33,7 @@ const App = () => {
   const [mode, setMode] = useSwitchMode(ref);
   const focusedAnnoRef = useSelect(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
   useTransformPolyline(ref, rayCasterRef, focusedAnnoRef, [mode, setMode]);
+  useTransformCuboid(ref, focusedAnnoRef, [mode, setMode]);
   useDrawPolyline(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
   useDrawCuboid(ref, rayCasterRef, [annos, setAnnos], [mode, setMode]);
 
