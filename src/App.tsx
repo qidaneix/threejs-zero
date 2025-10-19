@@ -9,7 +9,7 @@ const App = () => {
     if (!divEle) return;
 
     main(divEle);
-  }, []);
+  });
 
   return <div className="app" ref={ref} tabIndex={0} />;
 };
