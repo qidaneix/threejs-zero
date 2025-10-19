@@ -37,13 +37,28 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  gl.vertexAttrib3f(a_Position, 0.0, 0.0, 0.0);
+  const g_points: number[] = [];
+  ele.addEventListener('click', (e) => {
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = e?.target?.getBoundingClientRect();
+    const x = (clientX - left - width / 2) / (width / 2);
+    const y = (height / 2 - (clientY - top)) / (height / 2);
+    console.log(x, y);
+
+    g_points.push(x, y);
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    for (let i = 0; i < g_points.length; i += 2) {
+      gl.vertexAttrib2f(a_Position, g_points[i], g_points[i + 1]);
+
+      gl.drawArrays(gl.POINTS, 0, 1);
+    }
+  });
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
-
-  gl.drawArrays(gl.POINTS, 0, 1);
 }
