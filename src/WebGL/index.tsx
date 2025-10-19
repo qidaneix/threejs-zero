@@ -11,8 +11,10 @@ const VSHADER_SOURCE = /* glsl */ `
 
 // Fragment shader program
 const FSHADER_SOURCE = /* glsl */ `
+  precision mediump float;
+  uniform vec4 u_FragColor;
   void main() {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    gl_FragColor = u_FragColor;
   }
 `;
 
@@ -37,20 +39,38 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  const g_points: number[] = [];
+  const u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+  if (!u_FragColor) {
+    console.log('Failed to get the storage location of u_FragColor');
+    return;
+  }
+
+  const g_points: { x: number; y: number }[] = [];
   ele.addEventListener('click', (e) => {
     const { clientX, clientY } = e;
     const { left, top, width, height } = e?.target?.getBoundingClientRect();
     const x = (clientX - left - width / 2) / (width / 2);
     const y = (height / 2 - (clientY - top)) / (height / 2);
-    console.log(x, y);
+    console.log({ x, y });
 
-    g_points.push(x, y);
+    g_points.push({ x, y });
 
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    for (let i = 0; i < g_points.length; i += 2) {
-      gl.vertexAttrib2f(a_Position, g_points[i], g_points[i + 1]);
+    for (let i = 0; i < g_points.length; i += 1) {
+      const { x, y } = g_points[i];
+
+      gl.vertexAttrib2f(a_Position, x, y);
+
+      if (x >= 0.0 && y >= 0.0) {
+        gl.uniform4f(u_FragColor, 1.0, 0.0, 0.0, 1);
+      } else if (x < 0.0 && y < 0.0) {
+        gl.uniform4f(u_FragColor, 0.0, 1.0, 0.0, 1);
+      } else if (x >= 0.0 && y < 0.0) {
+        gl.uniform4f(u_FragColor, 0.0, 0.0, 1.0, 1);
+      } else if (x < 0.0 && y >= 0.0) {
+        gl.uniform4f(u_FragColor, 1.0, 1.0, 0.0, 1);
+      }
 
       gl.drawArrays(gl.POINTS, 0, 1);
     }
