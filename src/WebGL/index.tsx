@@ -2,8 +2,9 @@ import { initCanvas } from './init-canvas';
 
 // Vertex shader program
 const VSHADER_SOURCE = /* glsl */ `
+  attribute vec4 a_Position;
   void main() {
-    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_Position = a_Position;
     gl_PointSize = 10.0;
   }
 `;
@@ -29,6 +30,14 @@ export function main(container: HTMLDivElement) {
     console.log('Failed to intialize shaders.');
     return;
   }
+
+  const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_Position < 0) {
+    console.log('Failed to get the storage location of a_Position');
+    return;
+  }
+
+  gl.vertexAttrib3f(a_Position, 0.0, 0.0, 0.0);
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
