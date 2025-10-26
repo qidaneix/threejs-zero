@@ -47,5 +47,5 @@ export function main(container: HTMLDivElement) {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // 绘制三个点
-  gl.drawArrays(gl.LINE_LOOP, 0, n);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
 }
