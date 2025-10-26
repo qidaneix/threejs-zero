@@ -1,5 +1,5 @@
 export function initVertexBuffers(gl: WebGL2RenderingContext) {
-  const vertices = new Float32Array([-0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5]);
+  const vertices = new Float32Array([0, 0.5, -0.5, -0.5, 0.5, -0.5]);
   const n = vertices.length / 2; // 点的个数
 
   // 创建缓冲区对象

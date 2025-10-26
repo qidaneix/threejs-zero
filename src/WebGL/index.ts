@@ -4,8 +4,9 @@ import { initVertexBuffers } from './init-vertex-buffers';
 // Vertex shader program
 const VSHADER_SOURCE = /* glsl */ `
   attribute vec4 a_Position;
+  uniform vec4 u_Translation;
   void main() {
-    gl_Position = a_Position;
+    gl_Position = a_Position + u_Translation;
   }
 `;
 
@@ -17,6 +18,10 @@ const FSHADER_SOURCE = /* glsl */ `
     gl_FragColor = u_FragColor;
   }
 `;
+
+const Tx = 0.5,
+  Ty = 0.5,
+  Tz = 0.0;
 
 export function main(container: HTMLDivElement) {
   const ele = initCanvas(container);
@@ -40,6 +45,14 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
+  // 将平移举例传输给顶点着色器
+  const u_Translation = gl.getUniformLocation(gl.program, 'u_Translation');
+  if (!u_Translation) {
+    console.log('Failed to get the storage location of u_Translation');
+    return;
+  }
+  gl.uniform4f(u_Translation, Tx, Ty, Tz, 0.0);
+
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
@@ -47,5 +60,5 @@ export function main(container: HTMLDivElement) {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // 绘制三个点
-  gl.drawArrays(gl.TRIANGLE_FAN, 0, n);
+  gl.drawArrays(gl.TRIANGLES, 0, n);
 }
