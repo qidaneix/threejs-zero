@@ -6,7 +6,6 @@ const VSHADER_SOURCE = /* glsl */ `
   attribute vec4 a_Position;
   void main() {
     gl_Position = a_Position;
-    gl_PointSize = 10.0;
   }
 `;
 
@@ -48,5 +47,5 @@ export function main(container: HTMLDivElement) {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // 绘制三个点
-  gl.drawArrays(gl.POINTS, 0, n);
+  gl.drawArrays(gl.TRIANGLES, 0, n);
 }
