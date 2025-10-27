@@ -19,9 +19,9 @@ const FSHADER_SOURCE = /* glsl */ `
   }
 `;
 
-const Tx = 0.5,
-  Ty = 0.5,
-  Tz = 0;
+const Sx = 1,
+  Sy = 1.5,
+  Sz = 1;
 
 export function main(container: HTMLDivElement) {
   const ele = initCanvas(container);
@@ -49,10 +49,10 @@ export function main(container: HTMLDivElement) {
 
   /* prettier-ignore */
   const xformMatrix = new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    Tx, Ty, Tz, 1
+    Sx, 0, 0, 0,
+    0, Sy, 0, 0,
+    0, 0, Sz, 0,
+    0, 0, 0, 1
   ]);
   /* prettier-ignore */
   // 将旋转矩阵传输给顶点着色器
