@@ -4,12 +4,9 @@ import { initVertexBuffers } from './init-vertex-buffers';
 // Vertex shader program
 const VSHADER_SOURCE = /* glsl */ `
   attribute vec4 a_Position;
-  uniform float u_CosB, u_SinB;
+  uniform mat4 u_xformMatrix;
   void main() {
-    gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
-    gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;
-    gl_Position.z = a_Position.z;
-    gl_Position.w = 1.0;
+    gl_Position = u_xformMatrix * a_Position;
   }
 `;
 
@@ -46,18 +43,21 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // 将旋转图形所需的数据传输给顶点着色器
+  // 创建旋转矩阵
   const cosB = Math.cos(ANGLE);
   const sinB = Math.sin(ANGLE);
 
-  const u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
-  const u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
-  if (!u_CosB || !u_SinB) {
-    console.log('Failed to get the storage location of u_CosB or u_SinB');
-    return;
-  }
-  gl.uniform1f(u_CosB, cosB);
-  gl.uniform1f(u_SinB, sinB);
+  /* prettier-ignore */
+  const xformMatrix = new Float32Array([
+    cosB, sinB, 0, 0,
+    -sinB, cosB, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+  ]);
+  /* prettier-ignore */
+  // 将旋转矩阵传输给顶点着色器
+  const u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
+  gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
