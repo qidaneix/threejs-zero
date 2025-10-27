@@ -4,9 +4,12 @@ import { initVertexBuffers } from './init-vertex-buffers';
 // Vertex shader program
 const VSHADER_SOURCE = /* glsl */ `
   attribute vec4 a_Position;
-  uniform vec4 u_Translation;
+  uniform float u_CosB, u_SinB;
   void main() {
-    gl_Position = a_Position + u_Translation;
+    gl_Position.x = a_Position.x * u_CosB - a_Position.y * u_SinB;
+    gl_Position.y = a_Position.x * u_SinB + a_Position.y * u_CosB;
+    gl_Position.z = a_Position.z;
+    gl_Position.w = 1.0;
   }
 `;
 
@@ -19,9 +22,7 @@ const FSHADER_SOURCE = /* glsl */ `
   }
 `;
 
-const Tx = 0.5,
-  Ty = 0.5,
-  Tz = 0.0;
+const ANGLE = Math.PI / 2;
 
 export function main(container: HTMLDivElement) {
   const ele = initCanvas(container);
@@ -45,13 +46,18 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // 将平移举例传输给顶点着色器
-  const u_Translation = gl.getUniformLocation(gl.program, 'u_Translation');
-  if (!u_Translation) {
-    console.log('Failed to get the storage location of u_Translation');
+  // 将旋转图形所需的数据传输给顶点着色器
+  const cosB = Math.cos(ANGLE);
+  const sinB = Math.sin(ANGLE);
+
+  const u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
+  const u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
+  if (!u_CosB || !u_SinB) {
+    console.log('Failed to get the storage location of u_CosB or u_SinB');
     return;
   }
-  gl.uniform4f(u_Translation, Tx, Ty, Tz, 0.0);
+  gl.uniform1f(u_CosB, cosB);
+  gl.uniform1f(u_SinB, sinB);
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
