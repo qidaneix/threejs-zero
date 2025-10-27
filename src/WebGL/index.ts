@@ -19,7 +19,9 @@ const FSHADER_SOURCE = /* glsl */ `
   }
 `;
 
-const ANGLE = Math.PI / 2;
+const Tx = 0.5,
+  Ty = 0.5,
+  Tz = 0;
 
 export function main(container: HTMLDivElement) {
   const ele = initCanvas(container);
@@ -44,15 +46,13 @@ export function main(container: HTMLDivElement) {
   }
 
   // 创建旋转矩阵
-  const cosB = Math.cos(ANGLE);
-  const sinB = Math.sin(ANGLE);
 
   /* prettier-ignore */
   const xformMatrix = new Float32Array([
-    cosB, sinB, 0, 0,
-    -sinB, cosB, 0, 0,
+    1, 0, 0, 0,
+    0, 1, 0, 0,
     0, 0, 1, 0,
-    0, 0, 0, 1
+    Tx, Ty, Tz, 1
   ]);
   /* prettier-ignore */
   // 将旋转矩阵传输给顶点着色器
