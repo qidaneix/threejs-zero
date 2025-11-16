@@ -4,9 +4,9 @@ import { initVertexBuffers } from './init-vertex-buffers';
 // Vertex shader program
 const VSHADER_SOURCE = /* glsl */ `
   attribute vec4 a_Position;
-  uniform mat4 u_xformMatrix;
+  uniform mat4 u_ModelMatrix;
   void main() {
-    gl_Position = u_xformMatrix * a_Position;
+    gl_Position = u_ModelMatrix * a_Position;
   }
 `;
 
@@ -41,19 +41,21 @@ export function main(container: HTMLDivElement) {
   }
 
   // 创建旋转矩阵
-  const xformMatrix = new Matrix4();
+  const modelMatrix = new Matrix4();
 
   // 设置旋转矩阵
-  const angle = 90;
-  xformMatrix.setRotate(angle, 0, 0, 1);
+  const angle = 60;
+  const tx = 0.5;
+  modelMatrix.setRotate(angle, 0, 0, 1);
+  modelMatrix.translate(tx, 0, 0);
 
   // 将旋转矩阵传输给顶点着色器
-  const u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
-  if (!u_xformMatrix) {
+  const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
     console.log('Failed to get the storage location of u_xformMatrix');
     return;
   }
-  gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix.elements);
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
