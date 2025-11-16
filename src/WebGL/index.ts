@@ -46,8 +46,8 @@ export function main(container: HTMLDivElement) {
   // 设置旋转矩阵
   const angle = 60;
   const tx = 0.5;
-  modelMatrix.setRotate(angle, 0, 0, 1);
-  modelMatrix.translate(tx, 0, 0);
+  modelMatrix.setTranslate(tx, 0, 0);
+  modelMatrix.rotate(angle, 0, 0, 1);
 
   // 将旋转矩阵传输给顶点着色器
   const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
