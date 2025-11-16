@@ -72,6 +72,7 @@ function draw(
   u_ModelMatrix: WebGLUniformLocation,
 ) {
   modelMatrix.setRotate(currentAngle, 0, 0, 1);
+  modelMatrix.translate(0.35, 0, 0);
 
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
