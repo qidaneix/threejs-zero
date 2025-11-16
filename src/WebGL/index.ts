@@ -13,15 +13,10 @@ const VSHADER_SOURCE = /* glsl */ `
 // Fragment shader program
 const FSHADER_SOURCE = /* glsl */ `
   precision mediump float;
-  uniform vec4 u_FragColor;
   void main() {
-    gl_FragColor = u_FragColor;
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   }
 `;
-
-const Sx = 1,
-  Sy = 1.5,
-  Sz = 1;
 
 export function main(container: HTMLDivElement) {
   const ele = initCanvas(container);
@@ -46,18 +41,19 @@ export function main(container: HTMLDivElement) {
   }
 
   // 创建旋转矩阵
-  /* prettier-ignore */
-  const xformMatrix = new Float32Array([
-    Sx, 0, 0, 0,
-    0, Sy, 0, 0,
-    0, 0, Sz, 0,
-    0, 0, 0, 1
-  ]);
-  /* prettier-ignore */
+  const xformMatrix = new Matrix4();
+
+  // 设置旋转矩阵
+  const angle = 90;
+  xformMatrix.setRotate(angle, 0, 0, 1);
 
   // 将旋转矩阵传输给顶点着色器
   const u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
-  gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
+  if (!u_xformMatrix) {
+    console.log('Failed to get the storage location of u_xformMatrix');
+    return;
+  }
+  gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix.elements);
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
