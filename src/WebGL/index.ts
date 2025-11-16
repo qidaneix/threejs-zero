@@ -46,7 +46,6 @@ export function main(container: HTMLDivElement) {
   }
 
   // 创建旋转矩阵
-
   /* prettier-ignore */
   const xformMatrix = new Float32Array([
     Sx, 0, 0, 0,
@@ -55,6 +54,7 @@ export function main(container: HTMLDivElement) {
     0, 0, 0, 1
   ]);
   /* prettier-ignore */
+
   // 将旋转矩阵传输给顶点着色器
   const u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
   gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
