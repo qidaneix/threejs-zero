@@ -18,6 +18,8 @@ const FSHADER_SOURCE = /* glsl */ `
   }
 `;
 
+const angle_step = 45;
+
 export function main(container: HTMLDivElement) {
   const ele = initCanvas(container);
 
@@ -40,14 +42,7 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // 创建旋转矩阵
-  const modelMatrix = new Matrix4();
-
-  // 设置旋转矩阵
-  const angle = 60;
-  const tx = 0.5;
-  modelMatrix.setTranslate(tx, 0, 0);
-  modelMatrix.rotate(angle, 0, 0, 1);
+  gl.clearColor(0, 0, 0, 1);
 
   // 将旋转矩阵传输给顶点着色器
   const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
@@ -55,14 +50,41 @@ export function main(container: HTMLDivElement) {
     console.log('Failed to get the storage location of u_xformMatrix');
     return;
   }
+
+  let currentAngle = 0;
+
+  // 创建变换矩阵
+  const modelMatrix = new Matrix4();
+
+  const tick = () => {
+    currentAngle = animate(currentAngle);
+    draw(gl, n, currentAngle, modelMatrix, u_ModelMatrix);
+    requestAnimationFrame(tick, ele);
+  };
+  tick();
+}
+
+function draw(
+  gl: WebGL2RenderingContext,
+  n: number,
+  currentAngle: number,
+  modelMatrix: Matrix4,
+  u_ModelMatrix: WebGLUniformLocation,
+) {
+  modelMatrix.setRotate(currentAngle, 0, 0, 1);
+
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0, 0, 0, 1);
-
-  // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // 绘制三个点
   gl.drawArrays(gl.TRIANGLES, 0, n);
+}
+
+let g_last = Date.now();
+function animate(angle: number) {
+  const now = Date.now();
+  const elapsed = now - g_last;
+  g_last = now;
+  const newAngle = angle + (angle_step * elapsed) / 1000.0;
+  return newAngle % 360;
 }
