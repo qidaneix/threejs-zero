@@ -6,9 +6,10 @@ const VSHADER_SOURCE = /* glsl */ `
   attribute vec4 a_Position;
   attribute vec4 a_Color;
   uniform mat4 u_ViewMatrix;
+  uniform mat4 u_ModelMatrix;
   varying vec4 v_Color;
   void main() {
-    gl_Position = u_ViewMatrix * a_Position;
+    gl_Position = u_ViewMatrix * u_ModelMatrix * a_Position;
     v_Color = a_Color;
   }
 `;
@@ -49,7 +50,8 @@ export function main(container: HTMLDivElement) {
 
   // get the storage location of u_ViewMatrix
   const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  if (!u_ViewMatrix) {
+  const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ViewMatrix || !u_ModelMatrix) {
     console.log('Failed to get the storage location of u_ViewMatrix');
     return;
   }
@@ -58,8 +60,13 @@ export function main(container: HTMLDivElement) {
   const viewMatrix = new Matrix4();
   viewMatrix.setLookAt(0.2, 0.25, 0.25, 0, 0, 0, 0, 1, 0);
 
-  // set the view matrix
+  // calculate matrix for rotate
+  const modelMatrix = new Matrix4();
+  modelMatrix.setRotate(-10, 0, 0, 1); // rotate
+
+  // set the view and model matrix
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
   // clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
