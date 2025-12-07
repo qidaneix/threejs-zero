@@ -33,14 +33,23 @@ export function main(container: HTMLDivElement) {
   const cosB = Math.cos(radian);
   const sinB = Math.sin(radian);
 
-  const u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
-  const u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
-  if (!u_CosB || !u_SinB) {
-    console.log('Failed to get the storage location of u_CosB or u_SinB');
+  // Note: WebGL is column major order
+  /* prettier-ignore */
+  const xformMatrix = new Float32Array([
+     cosB, sinB, 0.0, 0.0,
+    -sinB, cosB, 0.0, 0.0,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0
+  ]);
+  /* prettier-ignore */
+
+  // pass the rotation matrix to the vertex shader
+  const u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
+  if (!u_xformMatrix) {
+    console.log('Failed to get the storage location of u_xformMatrix');
     return;
   }
-  gl.uniform1f(u_CosB, cosB);
-  gl.uniform1f(u_SinB, sinB);
+  gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
 
   // specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
