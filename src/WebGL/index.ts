@@ -1,11 +1,21 @@
 import { initCanvas } from './init-canvas';
+import { VSHADER_SOURCE } from './vShanderSource';
+import { FSHADER_SOURCE } from './fShanderSource';
 
 export function main(container: HTMLDivElement) {
+  // Retrieve <canvas> element
   const ele = initCanvas(container);
 
+  // Get the rendering context for WebGL
   const gl = ele.getContext?.('webgl2');
   if (!gl) {
-    ele.innerText = '当前浏览器不支持 WebGL2，请更换浏览器后重试';
+    console.log('Failed to get the rendering context for WebGL');
+    return;
+  }
+
+  // Initialize shaders
+  if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+    console.log('failed to initialize shaders.');
     return;
   }
 
@@ -14,4 +24,7 @@ export function main(container: HTMLDivElement) {
 
   // clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // draw a point
+  gl.drawArrays(gl.POINTS, 0, 1);
 }
