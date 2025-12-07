@@ -26,8 +26,15 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
+  // get the storage location of u_FragColor
+  const u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
+  if (!u_FragColor) {
+    console.log('Failed to get the storage location of u_FragColor');
+    return;
+  }
+
   ele.addEventListener('mousedown', function (ev) {
-    click(ev, gl, ele, a_Position);
+    click(ev, gl, ele, a_Position, u_FragColor);
   });
 
   // specify the color for clearing <canvas>
@@ -37,12 +44,14 @@ export function main(container: HTMLDivElement) {
   gl.clear(gl.COLOR_BUFFER_BIT);
 }
 
-const g_points: number[] = []; // The array for the position of a mouse press
+const g_points: [number, number][] = []; // The array for the position of a mouse press
+const g_colors: [number, number, number, number][] = []; // The array to store the color of a point
 function click(
   ev: MouseEvent,
   gl: WebGL2RenderingContext,
   canvas: HTMLCanvasElement,
   a_Position: number,
+  u_FragColor: WebGLUniformLocation,
 ) {
   const x = ev.clientX; // x coordinate of a mouse pointer
   const y = ev.clientY; // y coordinate of a mouse pointer
@@ -52,15 +61,27 @@ function click(
   const standY = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
 
   // Store the coordinates to g_points array
-  g_points.push(standX);
-  g_points.push(standY);
+  g_points.push([standX, standY]);
+  // Store the coordinates to g_colors array
+  if (standX >= 0 && standY >= 0) {
+    g_colors.push([1, 0, 0, 1]); // red
+  } else if (standX < 0 && standY < 0) {
+    g_colors.push([0, 1, 0, 1]); // green
+  } else {
+    g_colors.push([1, 1, 1, 1]); //white
+  }
 
   // clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  for (let i = 0; i < g_points.length; i += 2) {
+  for (let i = 0; i < g_points.length; i += 1) {
+    const xy = g_points[i];
+    const rgba = g_colors[i];
+
     // Pass the position of a point to a_Position variable
-    gl.vertexAttrib3f(a_Position, g_points[i], g_points[i + 1], 0);
+    gl.vertexAttrib3f(a_Position, xy[0], xy[1], 0);
+    // Pass the color of a point to u_FragColor variable
+    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
 
     // draw a point
     gl.drawArrays(gl.POINTS, 0, 1);
