@@ -32,8 +32,8 @@ export function main(container: HTMLDivElement) {
   // Calculate a model matrix
   const ANGLE = 60.0; // The rotation angle
   const Tx = 0.5; // Translation distance
-  modelMatrix.setRotate(ANGLE, 0, 0, 1); // set rotation matrix
-  modelMatrix.translate(Tx, 0, 0); // multiply modelMatrix by the calculated translation matrix
+  modelMatrix.setTranslate(Tx, 0, 0); // Set translation matrix
+  modelMatrix.rotate(ANGLE, 0, 0, 1); // Multiply modelMatrix by the calculated rotation matrix
 
   // pass the model matrix to the vertex shader
   const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
