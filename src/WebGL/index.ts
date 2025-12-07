@@ -26,18 +26,21 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // pass the translation distance to the vertex shader
-  const u_Translation = gl.getUniformLocation(gl.program, 'u_Translation');
-  if (!u_Translation) {
-    console.log('Failed to get the storage location of u_Translation');
+  // The rotation angle
+  const ANGLE = 90.0;
+  // pass the data required to rotate the shape to the vertex shader
+  const radian = (Math.PI * ANGLE) / 180; // convert to radians
+  const cosB = Math.cos(radian);
+  const sinB = Math.sin(radian);
+
+  const u_CosB = gl.getUniformLocation(gl.program, 'u_CosB');
+  const u_SinB = gl.getUniformLocation(gl.program, 'u_SinB');
+  if (!u_CosB || !u_SinB) {
+    console.log('Failed to get the storage location of u_CosB or u_SinB');
     return;
   }
-
-  // The translation distance for x, y, and z direction
-  const Tx = 0.5,
-    Ty = 0.5,
-    Tz = 0.0;
-  gl.uniform4f(u_Translation, Tx, Ty, Tz, 0);
+  gl.uniform1f(u_CosB, cosB);
+  gl.uniform1f(u_SinB, sinB);
 
   // specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
