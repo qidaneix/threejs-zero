@@ -93,6 +93,7 @@ function draw(
 ) {
   // Set the rotation matrix
   modelMatrix.setRotate(currentAngle, 0, 0, 1); // Rotation angle, rotation axis (0, 0, 1)
+  modelMatrix.translate(0.35, 0, 0);
 
   // Pass the rotation matrix to the vertex shader
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
