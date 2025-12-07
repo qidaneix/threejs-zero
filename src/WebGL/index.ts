@@ -26,14 +26,8 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // Create Matrix4 object for model transformation
-  const modelMatrix = new Matrix4();
-
-  // Calculate a model matrix
-  const ANGLE = 60.0; // The rotation angle
-  const Tx = 0.5; // Translation distance
-  modelMatrix.setTranslate(Tx, 0, 0); // Set translation matrix
-  modelMatrix.rotate(ANGLE, 0, 0, 1); // Multiply modelMatrix by the calculated rotation matrix
+  // specify the color for clearing <canvas>
+  gl.clearColor(0, 0, 0, 1);
 
   // pass the model matrix to the vertex shader
   const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
@@ -41,16 +35,21 @@ export function main(container: HTMLDivElement) {
     console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
-  // specify the color for clearing <canvas>
-  gl.clearColor(0, 0, 0, 1);
+  // current rotation angle
+  let currentAngle = 0;
 
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  // Create Matrix4 object for model transformation
+  const modelMatrix = new Matrix4();
 
-  // Draw the rectangle
-  gl.drawArrays(gl.TRIANGLES, 0, n);
+  // start drawing
+  const tick = () => {
+    currentAngle = animate(currentAngle); // Update the rotation angle
+    draw(gl, n, currentAngle, modelMatrix, u_ModelMatrix); // Draw the triangle
+    requestAnimationFrame(tick); // Request that the browser calls tick
+  };
+
+  tick();
 }
 
 function initVertexBuffers(gl: WebGL2RenderingContext) {
@@ -83,4 +82,38 @@ function initVertexBuffers(gl: WebGL2RenderingContext) {
   gl.enableVertexAttribArray(a_Position);
 
   return n;
+}
+
+function draw(
+  gl: WebGL2RenderingContext,
+  n: number,
+  currentAngle: number,
+  modelMatrix: Matrix4,
+  u_ModelMatrix: WebGLUniformLocation,
+) {
+  // Set the rotation matrix
+  modelMatrix.setRotate(currentAngle, 0, 0, 1); // Rotation angle, rotation axis (0, 0, 1)
+
+  // Pass the rotation matrix to the vertex shader
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Draw the rectangle
+  gl.drawArrays(gl.TRIANGLES, 0, n);
+}
+
+// Rotation angle (degrees/second)
+const ANGLE_STEP = 45.0;
+// Last time that this function was called
+let g_last = Date.now();
+function animate(angle: number) {
+  // calculate the elapsed time
+  const now = Date.now();
+  const elapsed = now - g_last;
+  g_last = now;
+  // Update the current rotation angle (adjusted by the elapsed time)
+  let newAngle = angle + (ANGLE_STEP * elapsed) / 1000.0;
+  return (newAngle %= 360);
 }
