@@ -26,30 +26,22 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // The rotation angle
-  const ANGLE = 90.0;
-  // pass the data required to rotate the shape to the vertex shader
-  const radian = (Math.PI * ANGLE) / 180; // convert to radians
-  const cosB = Math.cos(radian);
-  const sinB = Math.sin(radian);
+  // Create Matrix4 object for model transformation
+  const modelMatrix = new Matrix4();
 
-  // Note: WebGL is column major order
-  /* prettier-ignore */
-  const xformMatrix = new Float32Array([
-     cosB, sinB, 0.0, 0.0,
-    -sinB, cosB, 0.0, 0.0,
-      0.0,  0.0, 1.0, 0.0,
-      0.0,  0.0, 0.0, 1.0
-  ]);
-  /* prettier-ignore */
+  // Calculate a model matrix
+  const ANGLE = 60.0; // The rotation angle
+  const Tx = 0.5; // Translation distance
+  modelMatrix.setRotate(ANGLE, 0, 0, 1); // set rotation matrix
+  modelMatrix.translate(Tx, 0, 0); // multiply modelMatrix by the calculated translation matrix
 
-  // pass the rotation matrix to the vertex shader
-  const u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
-  if (!u_xformMatrix) {
-    console.log('Failed to get the storage location of u_xformMatrix');
+  // pass the model matrix to the vertex shader
+  const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
+    console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
-  gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
   // specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
