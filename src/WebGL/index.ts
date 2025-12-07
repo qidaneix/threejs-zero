@@ -19,6 +19,16 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
+  // get the storage location of a_Position
+  const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_Position < 0) {
+    console.log('Failed to get the storage location of a_Position');
+    return;
+  }
+
+  // Pass vertex position to attribute variable
+  gl.vertexAttrib3f(a_Position, 0, 0, 0);
+
   // specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
