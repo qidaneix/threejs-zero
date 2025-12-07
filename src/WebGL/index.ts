@@ -19,71 +19,51 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // get the storage location of a_Position
-  const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-  if (a_Position < 0) {
-    console.log('Failed to get the storage location of a_Position');
+  // write the positions of vertices to a vertex shader
+  const n = initVertexBuffers(gl);
+  if (n < 0) {
+    console.log('Failed to set the positions of the vertices');
     return;
   }
-
-  // get the storage location of u_FragColor
-  const u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
-  if (!u_FragColor) {
-    console.log('Failed to get the storage location of u_FragColor');
-    return;
-  }
-
-  ele.addEventListener('mousedown', function (ev) {
-    click(ev, gl, ele, a_Position, u_FragColor);
-  });
 
   // specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
-  // clear <canvas>
+  // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Draw three points
+  gl.drawArrays(gl.POINTS, 0, n);
 }
 
-const g_points: [number, number][] = []; // The array for the position of a mouse press
-const g_colors: [number, number, number, number][] = []; // The array to store the color of a point
-function click(
-  ev: MouseEvent,
-  gl: WebGL2RenderingContext,
-  canvas: HTMLCanvasElement,
-  a_Position: number,
-  u_FragColor: WebGLUniformLocation,
-) {
-  const x = ev.clientX; // x coordinate of a mouse pointer
-  const y = ev.clientY; // y coordinate of a mouse pointer
-  const rect = ev.target.getBoundingClientRect();
+function initVertexBuffers(gl: WebGL2RenderingContext) {
+  const vertices = new Float32Array([0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+  const n = 3; // The number of vertices
 
-  const standX = (x - rect.left - canvas.width / 2) / (canvas.width / 2);
-  const standY = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
-
-  // Store the coordinates to g_points array
-  g_points.push([standX, standY]);
-  // Store the coordinates to g_colors array
-  if (standX >= 0 && standY >= 0) {
-    g_colors.push([1, 0, 0, 1]); // red
-  } else if (standX < 0 && standY < 0) {
-    g_colors.push([0, 1, 0, 1]); // green
-  } else {
-    g_colors.push([1, 1, 1, 1]); //white
+  // create a buffer object
+  const vertexBuffer = gl.createBuffer();
+  if (!vertexBuffer) {
+    console.log('Failed to create the buffer object');
+    return -1;
   }
 
-  // clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  // bind the buffer object to target
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  // write date into the buffer object
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-  for (let i = 0; i < g_points.length; i += 1) {
-    const xy = g_points[i];
-    const rgba = g_colors[i];
-
-    // Pass the position of a point to a_Position variable
-    gl.vertexAttrib3f(a_Position, xy[0], xy[1], 0);
-    // Pass the color of a point to u_FragColor variable
-    gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
-    // draw a point
-    gl.drawArrays(gl.POINTS, 0, 1);
+  // get the storage location of a_Position
+  const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+  if (a_Position < 0) {
+    console.log('Failed to get the storage location of a_Position');
+    return -1;
   }
+
+  // assign the buffer object to a_Position variable
+  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+
+  // enable the assignment to a_Position variable
+  gl.enableVertexAttribArray(a_Position);
+
+  return n;
 }
