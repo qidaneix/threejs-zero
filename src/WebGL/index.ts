@@ -33,7 +33,7 @@ export function main(container: HTMLDivElement) {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Draw three points
-  gl.drawArrays(gl.POINTS, 0, n);
+  gl.drawArrays(gl.TRIANGLES, 0, n);
 }
 
 function initVertexBuffers(gl: WebGL2RenderingContext) {
