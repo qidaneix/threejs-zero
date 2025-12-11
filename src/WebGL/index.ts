@@ -29,11 +29,10 @@ export function main(container: HTMLDivElement) {
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
-  // Get the storage locations of u_ViewMatrix and u_ModelMatrix
-  const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-  if (!u_ViewMatrix || !u_ModelMatrix) {
-    console.log('Failed to get the storage location of u_ViewMatrix or u_ModelMatrix');
+  // Get the storage locations of u_ModelViewMatrix
+  const u_ModelViewMatrix = gl.getUniformLocation(gl.program, 'u_ModelViewMatrix');
+  if (!u_ModelViewMatrix) {
+    console.log('Failed to get the storage location of u_ModelViewMatrix');
     return;
   }
 
@@ -41,13 +40,15 @@ export function main(container: HTMLDivElement) {
   const viewMatrix = new Matrix4();
   viewMatrix.setLookAt(0.2, 0.25, 0.25, 0, 0, 0, 0, 1, 0);
 
-  // Calculate martrix for rotate
+  // Calculate matrix for rotate
   const modelMatrix = new Matrix4();
   modelMatrix.setRotate(-10, 0, 0, 1); // Rotate around z-axis
 
+  // Multiply model matrix to view matrix
+  const modelViewMatrix = viewMatrix.multiply(modelMatrix);
+
   // Set the view matrix and model matrix
-  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+  gl.uniformMatrix4fv(u_ModelViewMatrix, false, modelViewMatrix.elements);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT);
