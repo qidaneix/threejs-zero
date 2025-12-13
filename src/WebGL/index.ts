@@ -30,31 +30,21 @@ export function main(container: HTMLDivElement) {
   gl.clearColor(0, 0, 0, 1);
 
   // Get the storage locations of u_ModelViewMatrix
-  const u_ModelViewMatrix = gl.getUniformLocation(gl.program, 'u_ModelViewMatrix');
-  if (!u_ModelViewMatrix) {
-    console.log('Failed to get the storage location of u_ModelViewMatrix');
+  const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+  if (!u_ViewMatrix) {
+    console.log('Failed to get the storage location of u_ViewMatrix');
     return;
   }
 
   // Set the matrix to be used for to set the camera view
   const viewMatrix = new Matrix4();
-  viewMatrix.setLookAt(0.2, 0.25, 0.25, 0, 0, 0, 0, 1, 0);
 
-  // Calculate matrix for rotate
-  const modelMatrix = new Matrix4();
-  modelMatrix.setRotate(-10, 0, 0, 1); // Rotate around z-axis
+  // Register the event handler to be called on key press
+  window.addEventListener('keydown', function (event) {
+    keydown(event, gl, n, u_ViewMatrix, viewMatrix);
+  });
 
-  // Multiply model matrix to view matrix
-  const modelViewMatrix = viewMatrix.multiply(modelMatrix);
-
-  // Set the view matrix and model matrix
-  gl.uniformMatrix4fv(u_ModelViewMatrix, false, modelViewMatrix.elements);
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  // Draw the rectangle
-  gl.drawArrays(gl.TRIANGLES, 0, n);
+  draw(gl, n, u_ViewMatrix, viewMatrix); // Draw
 }
 
 function initVertexBuffers(gl: WebGL2RenderingContext) {
@@ -111,4 +101,48 @@ function initVertexBuffers(gl: WebGL2RenderingContext) {
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
   return n;
+}
+
+let g_eyeX = 0.2,
+  g_eyeY = 0.25;
+const g_eyeZ = 0.25; // Eye position
+function keydown(
+  event: KeyboardEvent,
+  gl: WebGL2RenderingContext,
+  n: number,
+  u_ViewMatrix: WebGLUniformLocation,
+  viewMatrix: Matrix4,
+) {
+  if (event.keyCode === 39) {
+    // The right arrow key was pressed
+    g_eyeX += 0.01;
+  } else if (event.keyCode === 37) {
+    // The left arrow key was pressed
+    g_eyeX -= 0.01;
+  } else if (event.keyCode === 38) {
+    // The up arrow key was pressed
+    g_eyeY += 0.01;
+  } else if (event.keyCode === 40) {
+    // The down arrow key was pressed
+    g_eyeY -= 0.01;
+  } else return;
+
+  draw(gl, n, u_ViewMatrix, viewMatrix);
+}
+
+function draw(
+  gl: WebGL2RenderingContext,
+  n: number,
+  u_ViewMatrix: WebGLUniformLocation,
+  viewMatrix: Matrix4,
+) {
+  // Set the matrix to be used for to set the camera view
+  viewMatrix.setLookAt(g_eyeX, g_eyeY, g_eyeZ, 0, 0, 0, 0, 1, 0);
+
+  // Pass the view matrix
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+
+  gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
+
+  gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangle
 }
