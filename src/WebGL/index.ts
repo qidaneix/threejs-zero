@@ -147,7 +147,7 @@ function draw(
   projMatrix: Matrix4,
 ) {
   // Specify the viewing volume
-  projMatrix.setOrtho(-0.5, 0.5, -0.5, 0.5, g_near, g_far);
+  projMatrix.setOrtho(-0.3, 0.3, -1.0, 1.0, g_near, g_far);
 
   // Pass the view projection matrix
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
