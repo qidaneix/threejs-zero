@@ -29,39 +29,38 @@ export function main(container: HTMLDivElement) {
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
-  // Get the storage locations of u_ModelMatrix, u_ViewMatrix, and u_ProjMatrix
-  const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-  const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  const u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
-  if (!u_ModelMatrix || !u_ViewMatrix || !u_ProjMatrix) {
-    console.log(
-      'Failed to Get the storage locations of u_ModelMatrix, u_ViewMatrix, and/or u_ProjMatrix',
-    );
+  // Get the storage location of u_MvpMatrix
+  const u_MvpMatrix = gl.getUniformLocation(gl.program, 'u_MvpMatrix');
+  if (!u_MvpMatrix) {
+    console.log('Failed to get the storage location of u_MvpMatrix');
     return;
   }
 
   const modelMatrix = new Matrix4(); // The model matrix
   const viewMatrix = new Matrix4(); // The view matrix
   const projMatrix = new Matrix4(); // The projection matrix
+  const mvpMatrix = new Matrix4(); // Model view projection matrix
 
   // Calculate the view matrix and the projection matrix
   modelMatrix.setTranslate(0.75, 0, 0); // Translate 0.75 units along the positive x-axis
   viewMatrix.setLookAt(0, 0, 5, 0, 0, -100, 0, 1, 0);
   projMatrix.setPerspective(30, ele.width / ele.height, 1, 100);
+  // Calculate the model view projection matrix
+  mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
 
-  // Pass the model, view, and projection matrix to the uniform variable respectively
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-  gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
+  // Pass the model view projection matrix to u_MvpMatrix
+  gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 
   gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
 
   gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangles
 
   // Prepare the model matrix for another pair of triangles
-  modelMatrix.setTranslate(-0.75, 0, 0); // Translate 0.75 units along the negative x-axis
-  // Modify only the model matrix
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+  modelMatrix.setTranslate(-0.75, 0, 0);
+  // Calculate the model view projection matrix
+  mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
+  // Pass the model view projection matrix to u_MvpMatrix
+  gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 
   gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangles
 }
