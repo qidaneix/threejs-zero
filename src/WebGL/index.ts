@@ -44,8 +44,7 @@ export function main(container: HTMLDivElement) {
   const mvpMatrix = new Matrix4(); // Model view projection matrix
 
   // Calculate the view matrix and the projection matrix
-  modelMatrix.setTranslate(0.75, 0, 0); // Translate 0.75 units along the positive x-axis
-  viewMatrix.setLookAt(0, 0, 5, 0, 0, -100, 0, 1, 0);
+  viewMatrix.setLookAt(3.06, 2.5, 10.0, 0, 0, -2, 0, 1, 0);
   projMatrix.setPerspective(30, ele.width / ele.height, 1, 100);
   // Calculate the model view projection matrix
   mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
@@ -55,38 +54,30 @@ export function main(container: HTMLDivElement) {
   // Clear color and depth buffer
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangles
+  // Enable the polygon offset function
+  gl.enable(gl.POLYGON_OFFSET_FILL);
 
-  // Prepare the model matrix for another pair of triangles
-  modelMatrix.setTranslate(-0.75, 0, 0);
-  // Calculate the model view projection matrix
-  mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
-  // Pass the model view projection matrix to u_MvpMatrix
-  gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
-
-  gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangles
+  // Draw the triangles
+  gl.drawArrays(gl.TRIANGLES, 0, n / 2); // the green triangles
+  gl.polygonOffset(1.0, 1.0); // Set the polygon offset
+  gl.drawArrays(gl.TRIANGLES, n / 2, n / 2); // the yellow triangles
 }
 
 function initVertexBuffers(gl: WebGL2RenderingContext) {
   /* prettier-ignore */
   const verticesColors = new Float32Array([
-    // Vertex coordinates and color
-     0.0,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
-    -0.5, -1.0,   0.0,  0.4,  0.4,  1.0,
-     0.5, -1.0,   0.0,  1.0,  0.4,  0.4,
+     // Vertex coordinates and color
+     0.0,  2.5,  -5.0,  0.4,  1.0,  0.4, // The green triangle
+    -2.5, -2.5,  -5.0,  0.4,  1.0,  0.4,
+     2.5, -2.5,  -5.0,  1.0,  0.4,  0.4,
 
-
-     0.0,  1.0,  -2.0,  1.0,  1.0,  0.4, // The middle yellow one
-    -0.5, -1.0,  -2.0,  1.0,  1.0,  0.4,
-     0.5, -1.0,  -2.0,  1.0,  0.4,  0.4,
-
-     0.0,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
-    -0.5, -1.0,  -4.0,  0.4,  1.0,  0.4,
-     0.5, -1.0,  -4.0,  1.0,  0.4,  0.4,
+     0.0,  3.0,  -5.0,  1.0,  0.4,  0.4, // The yellow triagle
+    -3.0, -3.0,  -5.0,  1.0,  1.0,  0.4,
+     3.0, -3.0,  -5.0,  1.0,  1.0,  0.4,
   ])
   /* prettier-ignore */
 
-  const n = 9;
+  const n = 6;
 
   // Create a buffer object
   const vertexColorBuffer = gl.createBuffer();
