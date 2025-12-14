@@ -29,39 +29,39 @@ export function main(container: HTMLDivElement) {
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
-  // Get the storage locations of u_ModelViewMatrix
-  const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  if (!u_ViewMatrix) {
-    console.log('Failed to get the storage location of u_ViewMatrix');
+  // Get the storage locations of u_ProjMatrix
+  const u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
+  if (!u_ProjMatrix) {
+    console.log('Failed to get the storage location of u_ProjMatrix');
     return;
   }
 
-  // Set the matrix to be used for to set the camera view
-  const viewMatrix = new Matrix4();
+  // Create the matrix to set the eye point, and the line of sight
+  const projMatrix = new Matrix4();
 
   // Register the event handler to be called on key press
   window.addEventListener('keydown', function (event) {
-    keydown(event, gl, n, u_ViewMatrix, viewMatrix);
+    keydown(event, gl, n, u_ProjMatrix, projMatrix);
   });
 
-  draw(gl, n, u_ViewMatrix, viewMatrix); // Draw
+  draw(gl, n, u_ProjMatrix, projMatrix); // Draw
 }
 
 function initVertexBuffers(gl: WebGL2RenderingContext) {
   /* prettier-ignore */
   const verticesColors = new Float32Array([
-    // Vertex coordinates and color(RGBA)
-    0.0,  0.5, -0.4,   0.4, 1.0, 0.4, // The back green one
-   -0.5, -0.5, -0.4,   0.4, 1.0, 0.4,
-    0.5, -0.5, -0.4,   1.0, 0.4, 0.4,
+    // Vertex coordinates and color
+     0.0,  0.6,  -0.4,  0.4,  1.0,  0.4, // The back green one
+    -0.5, -0.4,  -0.4,  0.4,  1.0,  0.4,
+     0.5, -0.4,  -0.4,  1.0,  0.4,  0.4,
 
-    0.5,  0.4, -0.2,   1.0, 0.4, 0.4, // The middle yellow one
-   -0.5,  0.4, -0.2,   1.0, 0.4, 0.4,
-    0.0, -0.6, -0.2,   1.0, 1.0, 0.4,
+     0.5,  0.4,  -0.2,  1.0,  0.4,  0.4, // The middle yellow one
+    -0.5,  0.4,  -0.2,  1.0,  1.0,  0.4,
+     0.0, -0.6,  -0.2,  1.0,  1.0,  0.4,
 
-    0.0,  0.5,  0.0,   0.4, 0.4, 1.0, // The front blue one
-   -0.5, -0.5,  0.0,   0.4, 0.4, 1.0,
-    0.5, -0.5,  0.0,   1.0, 0.4, 0.4,
+     0.0,  0.5,   0.0,  0.4,  0.4,  1.0, // The front blue one
+    -0.5, -0.5,   0.0,  0.4,  0.4,  1.0,
+     0.5, -0.5,   0.0,  1.0,  0.4,  0.4,
   ])
   /* prettier-ignore */
 
@@ -103,46 +103,62 @@ function initVertexBuffers(gl: WebGL2RenderingContext) {
   return n;
 }
 
-let g_eyeX = 0.2,
-  g_eyeY = 0.25;
-const g_eyeZ = 0.25; // Eye position
+// The distances to the near and far clipping plane
+let g_near = 0.0;
+let g_far = 0.5;
 function keydown(
   event: KeyboardEvent,
   gl: WebGL2RenderingContext,
   n: number,
-  u_ViewMatrix: WebGLUniformLocation,
-  viewMatrix: Matrix4,
+  u_ProjMatrix: WebGLUniformLocation,
+  projMatrix: Matrix4,
 ) {
-  if (event.keyCode === 39) {
-    // The right arrow key was pressed
-    g_eyeX += 0.01;
-  } else if (event.keyCode === 37) {
-    // The left arrow key was pressed
-    g_eyeX -= 0.01;
-  } else if (event.keyCode === 38) {
-    // The up arrow key was pressed
-    g_eyeY += 0.01;
-  } else if (event.keyCode === 40) {
-    // The down arrow key was pressed
-    g_eyeY -= 0.01;
-  } else return;
+  switch (event.keyCode) {
+    case 39: {
+      // The right arrow key was pressed
+      g_near += 0.01;
+      break;
+    }
+    case 37: {
+      // The left arrow key was pressed
+      g_near -= 0.01;
+      break;
+    }
+    case 38: {
+      // The up arrow key was pressed
+      g_far += 0.01;
+      break;
+    }
+    case 40: {
+      // The down arrow key was pressed
+      g_far -= 0.01;
+      break;
+    }
+    default:
+      return;
+  }
 
-  draw(gl, n, u_ViewMatrix, viewMatrix);
+  draw(gl, n, u_ProjMatrix, projMatrix);
 }
 
 function draw(
   gl: WebGL2RenderingContext,
   n: number,
-  u_ViewMatrix: WebGLUniformLocation,
-  viewMatrix: Matrix4,
+  u_ProjMatrix: WebGLUniformLocation,
+  projMatrix: Matrix4,
 ) {
-  // Set the matrix to be used for to set the camera view
-  viewMatrix.setLookAt(g_eyeX, g_eyeY, g_eyeZ, 0, 0, 0, 0, 1, 0);
+  // Specify the viewing volume
+  projMatrix.setOrtho(-1.0, 1.0, -1.0, 1.0, g_near, g_far);
 
-  // Pass the view matrix
-  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+  // Pass the projection matrix
+  gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
   gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
+
+  // Display the current near and far values
+  console.log(
+    'near: ' + Math.round(g_near * 100) / 100 + ', far: ' + Math.round(g_far * 100) / 100,
+  );
 
   gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangle
 }
