@@ -28,6 +28,8 @@ export function main(container: HTMLDivElement) {
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
+  // Enable depth test
+  gl.enable(gl.DEPTH_TEST);
 
   // Get the storage location of u_MvpMatrix
   const u_MvpMatrix = gl.getUniformLocation(gl.program, 'u_MvpMatrix');
@@ -47,11 +49,11 @@ export function main(container: HTMLDivElement) {
   projMatrix.setPerspective(30, ele.width / ele.height, 1, 100);
   // Calculate the model view projection matrix
   mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
-
   // Pass the model view projection matrix to u_MvpMatrix
   gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 
-  gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
+  // Clear color and depth buffer
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   gl.drawArrays(gl.TRIANGLES, 0, n); // Draw the triangles
 
@@ -69,17 +71,18 @@ function initVertexBuffers(gl: WebGL2RenderingContext) {
   /* prettier-ignore */
   const verticesColors = new Float32Array([
     // Vertex coordinates and color
-     0.0,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
-    -0.5, -1.0,  -4.0,  0.4,  1.0,  0.4,
-     0.5, -1.0,  -4.0,  1.0,  0.4,  0.4,
+     0.0,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
+    -0.5, -1.0,   0.0,  0.4,  0.4,  1.0,
+     0.5, -1.0,   0.0,  1.0,  0.4,  0.4,
+
 
      0.0,  1.0,  -2.0,  1.0,  1.0,  0.4, // The middle yellow one
     -0.5, -1.0,  -2.0,  1.0,  1.0,  0.4,
      0.5, -1.0,  -2.0,  1.0,  0.4,  0.4,
 
-     0.0,  1.0,   0.0,  0.4,  0.4,  1.0,  // The front blue one
-    -0.5, -1.0,   0.0,  0.4,  0.4,  1.0,
-     0.5, -1.0,   0.0,  1.0,  0.4,  0.4,
+     0.0,  1.0,  -4.0,  0.4,  1.0,  0.4, // The back green one
+    -0.5, -1.0,  -4.0,  0.4,  1.0,  0.4,
+     0.5, -1.0,  -4.0,  1.0,  0.4,  0.4,
   ])
   /* prettier-ignore */
 
