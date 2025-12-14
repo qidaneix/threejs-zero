@@ -44,7 +44,7 @@ export function main(container: HTMLDivElement) {
   const mvpMatrix = new Matrix4(); // Model view projection matrix
 
   // Calculate the view matrix and the projection matrix
-  viewMatrix.setLookAt(3.06, 2.5, 10.0, 0, 0, -2, 0, 1, 0);
+  viewMatrix.setLookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
   projMatrix.setPerspective(30, ele.width / ele.height, 1, 100);
   // Calculate the model view projection matrix
   mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
@@ -54,34 +54,50 @@ export function main(container: HTMLDivElement) {
   // Clear color and depth buffer
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  // Enable the polygon offset function
-  gl.enable(gl.POLYGON_OFFSET_FILL);
-
-  // Draw the triangles
-  gl.drawArrays(gl.TRIANGLES, 0, n / 2); // the green triangles
-  gl.polygonOffset(1.0, 1.0); // Set the polygon offset
-  gl.drawArrays(gl.TRIANGLES, n / 2, n / 2); // the yellow triangles
+  // Draw the cube
+  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
 function initVertexBuffers(gl: WebGL2RenderingContext) {
+  // Create a cube
+  //    v6----- v5
+  //   /|      /|
+  //  v1------v0|
+  //  | |     | |
+  //  | |v7---|-|v4
+  //  |/      |/
+  //  v2------v3
+
   /* prettier-ignore */
   const verticesColors = new Float32Array([
-     // Vertex coordinates and color
-     0.0,  2.5,  -5.0,  0.4,  1.0,  0.4, // The green triangle
-    -2.5, -2.5,  -5.0,  0.4,  1.0,  0.4,
-     2.5, -2.5,  -5.0,  1.0,  0.4,  0.4,
-
-     0.0,  3.0,  -5.0,  1.0,  0.4,  0.4, // The yellow triagle
-    -3.0, -3.0,  -5.0,  1.0,  1.0,  0.4,
-     3.0, -3.0,  -5.0,  1.0,  1.0,  0.4,
+    // Vertex coordinates and color
+     1.0,  1.0,  1.0,     1.0,  1.0,  1.0,  // v0 White
+    -1.0,  1.0,  1.0,     1.0,  0.0,  1.0,  // v1 Magenta
+    -1.0, -1.0,  1.0,     1.0,  0.0,  0.0,  // v2 Red
+     1.0, -1.0,  1.0,     1.0,  1.0,  0.0,  // v3 Yellow
+     1.0, -1.0, -1.0,     0.0,  1.0,  0.0,  // v4 Green
+     1.0,  1.0, -1.0,     0.0,  1.0,  1.0,  // v5 Cyan
+    -1.0,  1.0, -1.0,     0.0,  0.0,  1.0,  // v6 Blue
+    -1.0, -1.0, -1.0,     0.0,  0.0,  0.0   // v7 Black
   ])
   /* prettier-ignore */
 
-  const n = 6;
+  // Indices of the vertices
+  /* prettier-ignore */
+  const indices = new Uint8Array([
+    0, 1, 2,   0, 2, 3,    // front
+    0, 3, 4,   0, 4, 5,    // right
+    0, 5, 6,   0, 6, 1,    // up
+    1, 6, 7,   1, 7, 2,    // left
+    7, 4, 3,   7, 3, 2,    // down
+    4, 7, 6,   4, 6, 5     // back
+ ]);
+  /* prettier-ignore */
 
   // Create a buffer object
   const vertexColorBuffer = gl.createBuffer();
-  if (!vertexColorBuffer) {
+  const indexBuffer = gl.createBuffer();
+  if (!vertexColorBuffer || !indexBuffer) {
     console.log('Failed to create the buffer object');
     return -1;
   }
@@ -110,8 +126,9 @@ function initVertexBuffers(gl: WebGL2RenderingContext) {
   gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
   gl.enableVertexAttribArray(a_Color);
 
-  // Unbind the buffer object
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  // Write the indices to the buffer object
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-  return n;
+  return indices.length;
 }
