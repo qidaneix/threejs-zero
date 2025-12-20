@@ -1,11 +1,17 @@
 // Vertex shader program
 export const VSHADER_SOURCE = /* glsl */ `
 attribute vec4 a_Position;
-attribute vec4 a_Color;
+attribute vec4 a_Normal;
 uniform mat4 u_MvpMatrix;
+uniform mat4 u_NormalMatrix;
 varying vec4 v_Color;
 void main() {
   gl_Position = u_MvpMatrix * a_Position;
-  v_Color = a_Color;
+  // Shading calculation to make the arm look three-dimensional
+  vec3 lightDirection = normalize(vec3(0.0, 0.5, 0.7));
+  vec4 color = vec4(1.0, 0.4, 0.0, 1.0);
+  vec3 normal = normalize((u_NormalMatrix * a_Normal).xyz);
+  float nDotL = max(dot(lightDirection, normal), 0.0);
+  v_Color = vec4(color.rgb * nDotL + vec3(0.1), color.a);
 }
 `;
