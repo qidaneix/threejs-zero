@@ -35,22 +35,16 @@ export function main(container: HTMLDivElement) {
 
   // Get the storage location of uniform variables
   const u_MvpMatrix = gl.getUniformLocation(gl.program, 'u_MvpMatrix');
-  const u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-  const u_Eye = gl.getUniformLocation(gl.program, 'u_Eye');
   const u_FogColor = gl.getUniformLocation(gl.program, 'u_FogColor');
   const u_FogDist = gl.getUniformLocation(gl.program, 'u_FogDist');
-  if (!u_MvpMatrix || !u_ModelMatrix || !u_Eye || !u_FogColor || !u_FogDist) {
+  if (!u_MvpMatrix || !u_FogColor || !u_FogDist) {
     console.log('Failed to get the storage location');
     return;
   }
 
   // Pass fog color, distances, and eye point to uniform variable
-  gl.uniform4fv(u_Eye, eye); // Eye point
   gl.uniform3fv(u_FogColor, fogColor); // Colors
   gl.uniform2fv(u_FogDist, fogDist); // Starting point and end point
-
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0, 0, 0, 1);
 
   // Set clear color and enable hidden surface removal
   gl.clearColor(fogColor[0], fogColor[1], fogColor[2], 1.0); // Color of Fog
@@ -58,8 +52,7 @@ export function main(container: HTMLDivElement) {
 
   // Pass the model matrix to u_ModelMatrix
   const modelMatrix = new Matrix4();
-  modelMatrix.setScale(10, 10, 10);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+  modelMatrix.setScale(10, 10, 10); // Set scale factor to 10
 
   // Pass the model view projection matrix to u_MvpMatrix
   const mvpMatrix = new Matrix4();
