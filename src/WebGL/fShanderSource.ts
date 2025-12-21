@@ -3,10 +3,15 @@ export const FSHADER_SOURCE = /* glsl */ `
 #ifdef GL_ES
 precision mediump float;
 #endif
-void main() { // Center coordinate is (0.5, 0.5)
-  float d = distance(gl_PointCoord, vec2(0.5, 0.5));
-  if (d < 0.5) { // Radius is 0.5
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-  } else { discard; }
+uniform vec3 u_FogColor; // Color of Fog
+uniform vec2 u_FogDist; // Distance of Fog (starting point, end point)
+varying vec4 v_Color;
+varying float v_Dist;
+void main() {
+  // Calculation of fog factor (factor becomes smaller as it goes further away from eye point)
+  float fogFactor = clamp((u_FogDist.y - v_Dist) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
+  // Stronger fog as it gets further: u_FogColor * (1 - fogFactor) + v_Color * fogFactor
+  vec3 color = mix(u_FogColor, vec3(v_Color), fogFactor);
+  gl_FragColor = vec4(color, v_Color.a);
 }
 `;
