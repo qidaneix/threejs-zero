@@ -19,7 +19,7 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // Set vertex
+  // Set the vertex information
   const n = initVertexBuffer(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
@@ -29,59 +29,115 @@ export function main(container: HTMLDivElement) {
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
 
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  // Draw three points
-  gl.drawArrays(gl.TRIANGLES, 0, n);
+  // Set texture
+  if (!initTextures(gl, n)) {
+    console.log('Failed to intialize the texture.');
+    return;
+  }
 }
 
 function initVertexBuffer(gl: WebGL2RenderingContext) {
   /* prettier-ignore */
-  const vertices = new Float32Array([
-    // Vertex coordinates
-     0.0,  0.5,
-    -0.5, -0.5,
-     0.5, -0.5,
+  const verticesTexCoords = new Float32Array([
+    // Vertex coordinates, texture coordinate
+    -0.5,  0.5,  0.0, 1.0,
+    -0.5, -0.5,  0.0, 0.0,
+     0.5,  0.5,  1.0, 1.0,
+     0.5, -0.5,  1.0, 0.0,
   ]);
   /* prettier-ignore */
 
-  const n = 3; // The number of vertices
+  const n = 4; // The number of vertices
 
-  // Create a buffer object
-  const vertexBuffer = gl.createBuffer();
-  if (!vertexBuffer) {
+  // Create the buffer object
+  const vertexTexCoordBuffer = gl.createBuffer();
+  if (!vertexTexCoordBuffer) {
     console.log('Failed to create the buffer object');
     return -1;
   }
 
   // Bind the buffer object to target
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
 
-  //Get the storage location of a_Position and a_PointSize
+  const FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
+
+  // Get the storage location of a_Position, assign and enable buffer
   const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
   if (a_Position < 0) {
     console.log('Failed to get the storage location of a_Position');
     return -1;
   }
-
-  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 4, 0);
   gl.enableVertexAttribArray(a_Position); // Enable the assignment of the buffer object
 
-  const u_Width = gl.getUniformLocation(gl.program, 'u_Width');
-  const u_Height = gl.getUniformLocation(gl.program, 'u_Height');
-  if (!u_Width || !u_Height) {
-    console.log('Failed to get the storage location of u_Width or u_Height');
-    return;
+  const a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
+  if (a_TexCoord < 0) {
+    console.log('Failed to get the storage location of a_TexCoord');
+    return -1;
   }
-
-  // Pass the width and hight of the <canvas>
-  gl.uniform1f(u_Width, gl.drawingBufferWidth);
-  gl.uniform1f(u_Height, gl.drawingBufferHeight);
+  // Assign the buffer object to a_TexCoord variable
+  gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE * 4, FSIZE * 2);
+  gl.enableVertexAttribArray(a_TexCoord); // Enable the assignment of the buffer object
 
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
   return n;
+}
+
+function initTextures(gl: WebGL2RenderingContext, n: number) {
+  const texture = gl.createTexture();
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  // Get the storage location of u_Sampler
+  const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+  if (!u_Sampler) {
+    console.log('Failed to get the storage location of u_Sampler');
+    return false;
+  }
+
+  const image = new Image();
+  if (!image) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+
+  // Register the event handler to be called on loading an image
+  image.addEventListener('load', function () {
+    loadTexture(gl, n, texture, u_Sampler, image);
+  });
+  // Tell the browser to load an image
+  image.src = '/resources/sky.jpg';
+
+  return true;
+}
+
+function loadTexture(
+  gl: WebGL2RenderingContext,
+  n: number,
+  texture: WebGLTexture,
+  u_Sampler: WebGLUniformLocation,
+  image: HTMLImageElement,
+) {
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler, 0);
+
+  gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw three rectangle
 }
