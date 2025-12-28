@@ -1,14 +1,9 @@
 // Vertex shader program
 export const VSHADER_SOURCE = /* glsl */ `
 attribute vec4 a_Position;
-attribute vec4 a_Color;
-uniform mat4 u_MvpMatrix;
-varying vec4 v_Color;
-varying float v_Dist;
+attribute float a_PointSize;
 void main() {
-  gl_Position = u_MvpMatrix * a_Position;
-  v_Color = a_Color;
-  // Use the negative z value of each vertex in view coordinate system
-  v_Dist = gl_Position.w;
+  gl_Position = a_Position;
+  gl_PointSize = a_PointSize;
 }
 `;
