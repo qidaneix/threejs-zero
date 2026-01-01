@@ -1,5 +1,5 @@
-// Fragment shader program
-export const FSHADER_SOURCE = /* glsl */ `
+// Fragment shader for single color drawing
+export const SOLID_FSHADER_SOURCE = /* glsl */ `
 #ifdef GL_ES
 precision mediump float;
 #endif
