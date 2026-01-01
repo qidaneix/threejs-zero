@@ -2,7 +2,7 @@ import { initCanvas } from './init-canvas';
 import { VSHADER_SOURCE } from './vShanderSource';
 import { FSHADER_SOURCE } from './fShanderSource';
 
-export function main(container: HTMLDivElement) {
+export async function main(container: HTMLDivElement) {
   // Retrieve <canvas> element
   const ele = initCanvas(container);
 
@@ -30,8 +30,8 @@ export function main(container: HTMLDivElement) {
   gl.clearColor(0, 0, 0, 1);
 
   // Set texture
-  if (!initTextures(gl, n)) {
-    console.log('Failed to intialize the texture.');
+  if (!(await initTextures(gl, n))) {
+    console.log('Failed to initialize the texture.');
     return;
   }
 }
@@ -40,10 +40,10 @@ function initVertexBuffer(gl: WebGL2RenderingContext) {
   /* prettier-ignore */
   const verticesTexCoords = new Float32Array([
     // Vertex coordinates, texture coordinate
-    -0.5,  0.5,   -0.3, 1.7,
-    -0.5, -0.5,   -0.3, -0.2,
-     0.5,  0.5,   1.7, 1.7,
-     0.5, -0.5,   1.7, -0.2
+    -0.5,  0.5,   0.0, 1.0,
+    -0.5, -0.5,   0.0, 0.0,
+     0.5,  0.5,   1.0, 1.0,
+     0.5, -0.5,   1.0, 0.0,
   ]);
   /* prettier-ignore */
 
@@ -86,60 +86,70 @@ function initVertexBuffer(gl: WebGL2RenderingContext) {
   return n;
 }
 
-function initTextures(gl: WebGL2RenderingContext, n: number) {
-  const texture = gl.createTexture();
-  if (!texture) {
+async function initTextures(gl: WebGL2RenderingContext, n: number) {
+  const texture0 = gl.createTexture();
+  const texture1 = gl.createTexture();
+  if (!texture0 || !texture1) {
     console.log('Failed to create the texture object');
     return false;
   }
 
   // Get the storage location of u_Sampler
-  const u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
-  if (!u_Sampler) {
+  const u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+  const u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+  if (!u_Sampler0 || !u_Sampler1) {
     console.log('Failed to get the storage location of u_Sampler');
     return false;
   }
 
-  const image = new Image();
-  if (!image) {
-    console.log('Failed to create the image object');
-    return false;
-  }
+  const [image0, image1] = await Promise.all([
+    loadImage('/resources/sky.jpg'),
+    loadImage('/resources/circle.gif'),
+  ]);
+  loadTexture(gl, texture0, u_Sampler0, image0, 0);
+  loadTexture(gl, texture1, u_Sampler1, image1, 1);
 
-  // Register the event handler to be called on loading an image
-  image.addEventListener('load', function () {
-    loadTexture(gl, n, texture, u_Sampler, image);
-  });
-  // Tell the browser to load an image
-  image.src = '/resources/sky.jpg';
+  gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw three rectangle
 
   return true;
 }
 
+function loadImage(imgSrc: string) {
+  const image = new Image();
+  if (!image) {
+    console.log('Failed to create the image object');
+    return Promise.reject();
+  }
+
+  image.src = imgSrc;
+  return new Promise<HTMLImageElement>((resolve) => {
+    image.addEventListener('load', function () {
+      return resolve(image);
+    });
+  });
+}
+
 function loadTexture(
   gl: WebGL2RenderingContext,
-  n: number,
   texture: WebGLTexture,
   u_Sampler: WebGLUniformLocation,
   image: HTMLImageElement,
+  texUnit: number,
 ) {
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
-  // Enable texture unit0
-  gl.activeTexture(gl.TEXTURE0);
+  // Make the texture unit active
+  const texUnitName = `TEXTURE${texUnit}`;
+  gl.activeTexture(gl?.[texUnitName]);
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
   // Set the texture parameters
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
   // Set the texture image
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
-  // Set the texture unit 0 to the sampler
-  gl.uniform1i(u_Sampler, 0);
-
-  gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
-
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw three rectangle
+  // Set the texture unit to sampler
+  gl.uniform1i(u_Sampler, texUnit);
 }
