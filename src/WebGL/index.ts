@@ -2,7 +2,7 @@ import { initCanvas } from './init-canvas';
 import { VSHADER_SOURCE } from './vShanderSource';
 import { FSHADER_SOURCE } from './fShanderSource';
 
-export async function main(container: HTMLDivElement) {
+export function main(container: HTMLDivElement) {
   // Retrieve <canvas> element
   const ele = initCanvas(container);
 
@@ -19,7 +19,7 @@ export async function main(container: HTMLDivElement) {
     return;
   }
 
-  // Set the vertex information
+  // Set the vertex coordinates and color (the blue triangle is in the front)
   const n = initVertexBuffer(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
@@ -28,57 +28,84 @@ export async function main(container: HTMLDivElement) {
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0, 0, 0, 1);
+  // Enable alpha blending
+  gl.enable(gl.BLEND);
+  // Set blending function
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-  // Set texture
-  if (!(await initTextures(gl, n))) {
-    console.log('Failed to initialize the texture.');
+  // get the storage locations of u_ViewMatrix and u_ProjMatrix
+  const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+  const u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
+  if (!u_ViewMatrix || !u_ProjMatrix) {
+    console.log('Failed to get the storage location of u_ViewMatrix and/or u_ProjMatrix');
     return;
   }
+
+  // Create the view projection matrix
+  const viewMatrix = new Matrix4();
+  // Register the event handler to be called on key press
+  window.addEventListener('keydown', function (ev) {
+    keydown(ev, gl, n, u_ViewMatrix, viewMatrix);
+  });
+
+  // Create Projection matrix and set to u_ProjMatrix
+  const projMatrix = new Matrix4();
+  projMatrix.setOrtho(-1, 1, -1, 1, 0, 2);
+  gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
+
+  // Draw
+  draw(gl, n, u_ViewMatrix, viewMatrix);
 }
 
 function initVertexBuffer(gl: WebGL2RenderingContext) {
   /* prettier-ignore */
-  const verticesTexCoords = new Float32Array([
-    // Vertex coordinates, texture coordinate
-    -0.5,  0.5,   0.0, 1.0,
-    -0.5, -0.5,   0.0, 0.0,
-     0.5,  0.5,   1.0, 1.0,
-     0.5, -0.5,   1.0, 0.0,
+  const verticesColors = new Float32Array([
+    // Vertex coordinates and color(RGBA)
+    0.0,  0.5,  -0.4,  0.4,  1.0,  0.4,  0.4, // The back green one
+   -0.5, -0.5,  -0.4,  0.4,  1.0,  0.4,  0.4,
+    0.5, -0.5,  -0.4,  1.0,  0.4,  0.4,  0.4,
+
+    0.5,  0.4,  -0.2,  1.0,  0.4,  0.4,  0.4, // The middle yellow one
+   -0.5,  0.4,  -0.2,  1.0,  1.0,  0.4,  0.4,
+    0.0, -0.6,  -0.2,  1.0,  1.0,  0.4,  0.4,
+
+    0.0,  0.5,   0.0,  0.4,  0.4,  1.0,  0.4,  // The front blue one
+   -0.5, -0.5,   0.0,  0.4,  0.4,  1.0,  0.4,
+    0.5, -0.5,   0.0,  1.0,  0.4,  0.4,  0.4,
   ]);
   /* prettier-ignore */
 
-  const n = 4; // The number of vertices
+  const n = 9; // The number of vertices
 
   // Create the buffer object
-  const vertexTexCoordBuffer = gl.createBuffer();
-  if (!vertexTexCoordBuffer) {
+  const vertexColorBuffer = gl.createBuffer();
+  if (!vertexColorBuffer) {
     console.log('Failed to create the buffer object');
     return -1;
   }
 
   // Bind the buffer object to target
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexTexCoordBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, verticesTexCoords, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
 
-  const FSIZE = verticesTexCoords.BYTES_PER_ELEMENT;
+  const FSIZE = verticesColors.BYTES_PER_ELEMENT;
 
-  // Get the storage location of a_Position, assign and enable buffer
   const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
   if (a_Position < 0) {
     console.log('Failed to get the storage location of a_Position');
     return -1;
   }
-  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, FSIZE * 4, 0);
+  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE * 7, 0);
   gl.enableVertexAttribArray(a_Position); // Enable the assignment of the buffer object
 
-  const a_TexCoord = gl.getAttribLocation(gl.program, 'a_TexCoord');
-  if (a_TexCoord < 0) {
-    console.log('Failed to get the storage location of a_TexCoord');
+  const a_Color = gl.getAttribLocation(gl.program, 'a_Color');
+  if (a_Color < 0) {
+    console.log('Failed to get the storage location of a_Color');
     return -1;
   }
-  // Assign the buffer object to a_TexCoord variable
-  gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, FSIZE * 4, FSIZE * 2);
-  gl.enableVertexAttribArray(a_TexCoord); // Enable the assignment of the buffer object
+  // Assign the buffer object to a_Color variable
+  gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, FSIZE * 7, FSIZE * 3);
+  gl.enableVertexAttribArray(a_Color); // Enable the assignment of the buffer object
 
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -86,70 +113,42 @@ function initVertexBuffer(gl: WebGL2RenderingContext) {
   return n;
 }
 
-async function initTextures(gl: WebGL2RenderingContext, n: number) {
-  const texture0 = gl.createTexture();
-  const texture1 = gl.createTexture();
-  if (!texture0 || !texture1) {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-
-  // Get the storage location of u_Sampler
-  const u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
-  const u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
-  if (!u_Sampler0 || !u_Sampler1) {
-    console.log('Failed to get the storage location of u_Sampler');
-    return false;
-  }
-
-  const [image0, image1] = await Promise.all([
-    loadImage('/resources/sky.jpg'),
-    loadImage('/resources/circle.gif'),
-  ]);
-  loadTexture(gl, texture0, u_Sampler0, image0, 0);
-  loadTexture(gl, texture1, u_Sampler1, image1, 1);
-
-  gl.clear(gl.COLOR_BUFFER_BIT); // Clear <canvas>
-
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); // Draw three rectangle
-
-  return true;
-}
-
-function loadImage(imgSrc: string) {
-  const image = new Image();
-  if (!image) {
-    console.log('Failed to create the image object');
-    return Promise.reject();
-  }
-
-  image.src = imgSrc;
-  return new Promise<HTMLImageElement>((resolve) => {
-    image.addEventListener('load', function () {
-      return resolve(image);
-    });
-  });
-}
-
-function loadTexture(
+// Eye position
+let g_EyeX = 0.2;
+const g_EyeY = 0.25;
+const g_EyeZ = 0.25;
+function keydown(
+  ev: KeyboardEvent,
   gl: WebGL2RenderingContext,
-  texture: WebGLTexture,
-  u_Sampler: WebGLUniformLocation,
-  image: HTMLImageElement,
-  texUnit: number,
+  n: number,
+  u_ViewMatrix: WebGLUniformLocation,
+  viewMatrix: Matrix4,
 ) {
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
-  // Make the texture unit active
-  const texUnitName = `TEXTURE${texUnit}`;
-  gl.activeTexture(gl?.[texUnitName]);
-  // Bind the texture object to the target
-  gl.bindTexture(gl.TEXTURE_2D, texture);
+  if (ev.keyCode == 39) {
+    // The right arrow key was pressed
+    g_EyeX += 0.01;
+  } else if (ev.keyCode == 37) {
+    // The left arrow key was pressed
+    g_EyeX -= 0.01;
+  } else return;
+  draw(gl, n, u_ViewMatrix, viewMatrix);
+}
 
-  // Set the texture parameters
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  // Set the texture image
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+function draw(
+  gl: WebGL2RenderingContext,
+  n: number,
+  u_ViewMatrix: WebGLUniformLocation,
+  viewMatrix: Matrix4,
+) {
+  // Set the matrix to be used for to set the camera view
+  viewMatrix.setLookAt(g_EyeX, g_EyeY, g_EyeZ, 0, 0, 0, 0, 1, 0);
 
-  // Set the texture unit to sampler
-  gl.uniform1i(u_Sampler, texUnit);
+  // Pass the view projection matrix
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+
+  // Clear <canvas>
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Draw the rectangle
+  gl.drawArrays(gl.TRIANGLES, 0, n);
 }
