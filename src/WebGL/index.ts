@@ -19,136 +19,132 @@ export function main(container: HTMLDivElement) {
     return;
   }
 
-  // Set the vertex coordinates and color (the blue triangle is in the front)
+  // Set the vertex information
   const n = initVertexBuffer(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
     return;
   }
 
-  // Specify the color for clearing <canvas>
+  // Set the clear color and enable the depth test
   gl.clearColor(0, 0, 0, 1);
+  // gl.enable(gl.DEPTH_TEST);
   // Enable alpha blending
   gl.enable(gl.BLEND);
   // Set blending function
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-  // get the storage locations of u_ViewMatrix and u_ProjMatrix
-  const u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  const u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
-  if (!u_ViewMatrix || !u_ProjMatrix) {
-    console.log('Failed to get the storage location of u_ViewMatrix and/or u_ProjMatrix');
+  // Get the storage location of u_MvpMatrix
+  const u_MvpMatrix = gl.getUniformLocation(gl.program, 'u_MvpMatrix');
+  if (!u_MvpMatrix) {
+    console.log('Failed to get the storage location of u_MvpMatrix');
     return;
   }
 
-  // Create the view projection matrix
-  const viewMatrix = new Matrix4();
-  // Register the event handler to be called on key press
-  window.addEventListener('keydown', function (ev) {
-    keydown(ev, gl, n, u_ViewMatrix, viewMatrix);
-  });
+  // Set the eye point and the viewing volume
+  const mvpMatrix = new Matrix4();
+  mvpMatrix.setPerspective(30, 1, 1, 100);
+  mvpMatrix.lookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
 
-  // Create Projection matrix and set to u_ProjMatrix
-  const projMatrix = new Matrix4();
-  projMatrix.setOrtho(-1, 1, -1, 1, 0, 2);
-  gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
+  // Pass the model view projection matrix to u_MvpMatrix
+  gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 
-  // Draw
-  draw(gl, n, u_ViewMatrix, viewMatrix);
+  // Clear color and depth buffer
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Draw the cube
+  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
 function initVertexBuffer(gl: WebGL2RenderingContext) {
+  // Create a cube
+  //    v6----- v5
+  //   /|      /|
+  //  v1------v0|
+  //  | |     | |
+  //  | |v7---|-|v4
+  //  |/      |/
+  //  v2------v3
+
   /* prettier-ignore */
-  const verticesColors = new Float32Array([
-    // Vertex coordinates and color(RGBA)
-    0.0,  0.5,  -0.4,  0.4,  1.0,  0.4,  0.4, // The back green one
-   -0.5, -0.5,  -0.4,  0.4,  1.0,  0.4,  0.4,
-    0.5, -0.5,  -0.4,  1.0,  0.4,  0.4,  0.4,
-
-    0.5,  0.4,  -0.2,  1.0,  0.4,  0.4,  0.4, // The middle yellow one
-   -0.5,  0.4,  -0.2,  1.0,  1.0,  0.4,  0.4,
-    0.0, -0.6,  -0.2,  1.0,  1.0,  0.4,  0.4,
-
-    0.0,  0.5,   0.0,  0.4,  0.4,  1.0,  0.4,  // The front blue one
-   -0.5, -0.5,   0.0,  0.4,  0.4,  1.0,  0.4,
-    0.5, -0.5,   0.0,  1.0,  0.4,  0.4,  0.4,
+  const vertices = new Float32Array([   // Vertex coordinates
+     1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0,    // v0-v1-v2-v3 front
+     1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0,    // v0-v3-v4-v5 right
+     1.0, 1.0, 1.0,   1.0, 1.0,-1.0,  -1.0, 1.0,-1.0,  -1.0, 1.0, 1.0,    // v0-v5-v6-v1 up
+    -1.0, 1.0, 1.0,  -1.0, 1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0,-1.0, 1.0,    // v1-v6-v7-v2 left
+    -1.0,-1.0,-1.0,   1.0,-1.0,-1.0,   1.0,-1.0, 1.0,  -1.0,-1.0, 1.0,    // v7-v4-v3-v2 down
+     1.0,-1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,   1.0, 1.0,-1.0     // v4-v7-v6-v5 back
   ]);
   /* prettier-ignore */
 
-  const n = 9; // The number of vertices
+  /* prettier-ignore */
+  const colors = new Float32Array([     // Colors
+      0.5, 0.5, 1.0, 0.4,  0.5, 0.5, 1.0, 0.4,  0.5, 0.5, 1.0, 0.4,  0.5, 0.5, 1.0, 0.4,  // v0-v1-v2-v3 front(blue)
+      0.5, 1.0, 0.5, 0.4,  0.5, 1.0, 0.5, 0.4,  0.5, 1.0, 0.5, 0.4,  0.5, 1.0, 0.5, 0.4,  // v0-v3-v4-v5 right(green)
+      1.0, 0.5, 0.5, 0.4,  1.0, 0.5, 0.5, 0.4,  1.0, 0.5, 0.5, 0.4,  1.0, 0.5, 0.5, 0.4,  // v0-v5-v6-v1 up(red)
+      1.0, 1.0, 0.5, 0.4,  1.0, 1.0, 0.5, 0.4,  1.0, 1.0, 0.5, 0.4,  1.0, 1.0, 0.5, 0.4,  // v1-v6-v7-v2 left
+      1.0, 1.0, 1.0, 0.4,  1.0, 1.0, 1.0, 0.4,  1.0, 1.0, 1.0, 0.4,  1.0, 1.0, 1.0, 0.4,  // v7-v4-v3-v2 down
+      0.5, 1.0, 1.0, 0.4,  0.5, 1.0, 1.0, 0.4,  0.5, 1.0, 1.0, 0.4,  0.5, 1.0, 1.0, 0.4   // v4-v7-v6-v5 back
+  ]);
+  /* prettier-ignore */
 
-  // Create the buffer object
-  const vertexColorBuffer = gl.createBuffer();
-  if (!vertexColorBuffer) {
-    console.log('Failed to create the buffer object');
-    return -1;
-  }
+  /* prettier-ignore */
+  const indices = new Uint8Array([       // Indices of the vertices
+     0, 1, 2,   0, 2, 3,    // front
+     4, 5, 6,   4, 6, 7,    // right
+     8, 9,10,   8,10,11,    // up
+    12,13,14,  12,14,15,    // left
+    16,17,18,  16,18,19,    // down
+    20,21,22,  20,22,23     // back
+  ]);
+  /* prettier-ignore */
 
-  // Bind the buffer object to target
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
+  // Write the vertex property to buffers (coordinates and normals)
+  if (!initArrayBuffer(gl, vertices, 3, gl.FLOAT, 'a_Position')) return -1;
 
-  const FSIZE = verticesColors.BYTES_PER_ELEMENT;
-
-  const a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-  if (a_Position < 0) {
-    console.log('Failed to get the storage location of a_Position');
-    return -1;
-  }
-  gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE * 7, 0);
-  gl.enableVertexAttribArray(a_Position); // Enable the assignment of the buffer object
-
-  const a_Color = gl.getAttribLocation(gl.program, 'a_Color');
-  if (a_Color < 0) {
-    console.log('Failed to get the storage location of a_Color');
-    return -1;
-  }
-  // Assign the buffer object to a_Color variable
-  gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, FSIZE * 7, FSIZE * 3);
-  gl.enableVertexAttribArray(a_Color); // Enable the assignment of the buffer object
+  if (!initArrayBuffer(gl, colors, 4, gl.FLOAT, 'a_Color')) return -1;
 
   // Unbind the buffer object
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  return n;
+  // Create a buffer object
+  const indexBuffer = gl.createBuffer();
+  if (!indexBuffer) return -1;
+
+  // Write the indices to the buffer object
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+  return indices.length;
 }
 
-// Eye position
-let g_EyeX = 0.2;
-const g_EyeY = 0.25;
-const g_EyeZ = 0.25;
-function keydown(
-  ev: KeyboardEvent,
+function initArrayBuffer(
   gl: WebGL2RenderingContext,
-  n: number,
-  u_ViewMatrix: WebGLUniformLocation,
-  viewMatrix: Matrix4,
+  data: Float32Array,
+  num: number,
+  type: number,
+  attribute: string,
 ) {
-  if (ev.keyCode == 39) {
-    // The right arrow key was pressed
-    g_EyeX += 0.01;
-  } else if (ev.keyCode == 37) {
-    // The left arrow key was pressed
-    g_EyeX -= 0.01;
-  } else return;
-  draw(gl, n, u_ViewMatrix, viewMatrix);
-}
+  // Create a buffer object
+  const buffer = gl.createBuffer();
+  if (!buffer) {
+    console.log('Failed to create the buffer object');
+    return false;
+  }
+  // Write date into the buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  // Assign the buffer object to the attribute variable
+  const a_attribute = gl.getAttribLocation(gl.program, attribute);
+  if (a_attribute < 0) {
+    console.log('Failed to get the storage location of ' + attribute);
+    return false;
+  }
+  gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+  // Enable the assignment of the buffer object to the attribute variable
+  gl.enableVertexAttribArray(a_attribute);
 
-function draw(
-  gl: WebGL2RenderingContext,
-  n: number,
-  u_ViewMatrix: WebGLUniformLocation,
-  viewMatrix: Matrix4,
-) {
-  // Set the matrix to be used for to set the camera view
-  viewMatrix.setLookAt(g_EyeX, g_EyeY, g_EyeZ, 0, 0, 0, 0, 1, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-  // Pass the view projection matrix
-  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  // Draw the rectangle
-  gl.drawArrays(gl.TRIANGLES, 0, n);
+  return true;
 }
