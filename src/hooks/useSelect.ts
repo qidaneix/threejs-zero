@@ -5,6 +5,8 @@ import { EMode } from '../interface';
 import { objectsGroup } from '../three/scene/group';
 import { transformControls } from '../three/controls/transform';
 import { Cuboid } from '../three/object/Cuboid';
+import { filterIntersections } from '../utils/filterIntersections';
+import { camera } from '../three/camera';
 
 export const useSelect = (
   divRef: React.RefObject<HTMLDivElement | null>,
@@ -29,33 +31,38 @@ export const useSelect = (
 
   // 鼠标hover
   const mousemoveHandler = useCallback(
-    function () {
+    function (event: MouseEvent) {
       cleanHoveredAnnoRef();
 
       const rayCaster = rayCasterRef.current;
       const objects = objectsGroup.children as THREE.Object3D[];
 
-      const intersections = rayCaster.intersectObjects(objects);
+      const intersections = rayCaster.intersectObjects(objects, true);
       if (!intersections?.length) return;
 
-      // TODO polyline选中更精准
-      // const filteredIntersections = filterIntersections(
-      //   intersections,
-      //   camera,
-      //   event,
-      //   divRef.current!,
-      // );
-      // if (!filteredIntersections?.length) return;
-      // const hoveredObject3D = filteredIntersections[0].object;
+      const filteredIntersections = filterIntersections(
+        intersections,
+        camera,
+        event,
+        divRef.current!,
+      );
+      if (!filteredIntersections?.length) return;
 
-      const hoveredObject3D = intersections[0].object;
-      const anno = annos.find((i) => i.getObject3D().uuid === hoveredObject3D.uuid);
+      const hoveredObject3D = filteredIntersections[0].object;
+      const anno = annos.find((i) => {
+        const obj3D = i.getObject3D();
+        if (obj3D.uuid === hoveredObject3D.uuid) return true;
+        if (obj3D instanceof THREE.Group) {
+          return obj3D.children.some((child) => child.uuid === hoveredObject3D.uuid);
+        }
+        return false;
+      });
       if (!anno) return;
 
       anno.onHover();
       hoveredAnnoRef.current = anno;
     },
-    [rayCasterRef, annos, cleanHoveredAnnoRef],
+    [rayCasterRef, annos, cleanHoveredAnnoRef, divRef],
   );
 
   // 鼠标点击

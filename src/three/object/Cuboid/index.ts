@@ -9,10 +9,11 @@ export class Cuboid {
 
   private isFocused: boolean = false;
 
+  private group: THREE.Group;
+
   private box: THREE.Mesh;
 
-  // TODO
-  // private lineSegments: THREE.LineSegments;
+  private lineSegments: THREE.LineSegments;
 
   private readonly color = new THREE.Color(0x00ffff);
 
@@ -23,6 +24,7 @@ export class Cuboid {
   constructor({ id, points }: { id: string; points: I4Vector4s }) {
     this.id = id;
     const matrix = computeTransformationMatrix(points); // 转换矩阵
+
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({
       color: this.color,
@@ -31,7 +33,20 @@ export class Cuboid {
       opacity: 0.5,
     });
     this.box = new THREE.Mesh(geometry, material);
-    this.box.applyMatrix4(matrix);
+    this.box.raycast = () => {};
+
+    const edgeGeometry = new THREE.EdgesGeometry(geometry);
+    const edgeMaterial = new THREE.LineBasicMaterial({
+      color: this.color,
+      opacity: 1,
+      transparent: true,
+    });
+    this.lineSegments = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+
+    this.group = new THREE.Group();
+    this.group.add(this.box);
+    this.group.add(this.lineSegments);
+    this.group.applyMatrix4(matrix);
   }
 
   public static create({ id, points }: { id: string; points: I4Points }) {
@@ -46,6 +61,7 @@ export class Cuboid {
     // 变色
     const material = this.box.material as THREE.LineBasicMaterial;
     material.color.set(this.hoverColor);
+    (this.lineSegments.material as THREE.LineBasicMaterial).color.set(this.hoverColor);
   }
 
   public offHover() {
@@ -54,6 +70,7 @@ export class Cuboid {
     // 变色
     const material = this.box.material as THREE.LineBasicMaterial;
     material.color.set(this.color);
+    (this.lineSegments.material as THREE.LineBasicMaterial).color.set(this.color);
   }
 
   public onFocus() {
@@ -61,6 +78,7 @@ export class Cuboid {
     // 变色
     const material = this.box.material as THREE.LineBasicMaterial;
     material.color.set(this.focusColor);
+    (this.lineSegments.material as THREE.LineBasicMaterial).color.set(this.focusColor);
   }
 
   public offFocus() {
@@ -69,18 +87,23 @@ export class Cuboid {
     // 还原
     const material = this.box.material as THREE.LineBasicMaterial;
     material.color.set(this.color);
+    (this.lineSegments.material as THREE.LineBasicMaterial).color.set(this.color);
   }
 
   public dispose() {
-    objectsGroup.remove(this.box);
+    objectsGroup.remove(this.group);
   }
 
   public getMash() {
-    return this.box;
+    return this.group;
+  }
+
+  public getLineSegments() {
+    return this.lineSegments;
   }
 
   public getObject3D() {
-    return this.getMash();
+    return this.group;
   }
 
   public getId() {

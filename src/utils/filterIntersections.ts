@@ -45,7 +45,7 @@ export function filterByDynamicThreshold(
     return Math.max(2, 10 / (distanceToCamera * 0.1));
   }
 
-  const distance = camera.position.distanceTo(intersection.object.position);
+  const distance = camera.position.distanceTo(intersection.point);
   const threshold = getDynamicThreshold(distance);
 
   // 重新计算该阈值下的距离
@@ -72,7 +72,7 @@ export function filterIntersections(
 ) {
   const filteredIntersections = intersections.filter((i) => {
     // 非THREE.Line，直接运行
-    if (!(i instanceof THREE.Line)) return true;
+    if (!(i.object instanceof THREE.Line)) return true;
 
     return (
       filterByScreenDistance(i, camera, event, domElement, maxScreenDistance) &&
